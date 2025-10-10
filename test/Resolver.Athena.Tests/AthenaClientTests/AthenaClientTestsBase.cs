@@ -1,6 +1,6 @@
-using Resolver.Athena.Grpc;
-using Moq;
 using Grpc.Core;
+using Moq;
+using Resolver.Athena.Grpc;
 
 namespace Resolver.Athena.Tests.AthenaClientTests;
 
