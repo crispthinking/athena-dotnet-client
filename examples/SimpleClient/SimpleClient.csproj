@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Resolver.Athena.Grpc\Models\Resolver.Athena.Grpc.Models.csproj" />
+    <ProjectReference Include="..\..\src\Resolver.Athena.Grpc\Models\Resolver.Athena.Grpc.Models.csproj" />
   </ItemGroup>
 
 </Project>
