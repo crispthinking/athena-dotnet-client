@@ -1,4 +1,4 @@
-﻿using Grpc.Core;
+using Grpc.Core;
 using Resolver.Athena.Grpc;
 using Resolver.Athena.Interfaces;
 using Resolver.Athena.Models;

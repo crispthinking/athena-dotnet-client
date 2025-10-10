@@ -1,4 +1,4 @@
-﻿using Resolver.Athena.Grpc;
+using Resolver.Athena.Grpc;
 
 class Program
 {
