@@ -1,0 +1,3 @@
+[submodule "athena-protobufs"]
+	path = athena-protobufs
+	url = https://github.com/crispthinking/athena-protobufs.git

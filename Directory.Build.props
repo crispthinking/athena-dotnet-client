@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <ProtoDefinitionsFolder>$(MSBuildThisFileDirectory)/athena-protobufs</ProtoDefinitionsFolder>
+  </PropertyGroup>
+</Project>
