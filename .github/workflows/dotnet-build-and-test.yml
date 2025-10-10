@@ -15,6 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Initialize submodules
+        run: |
+          git submodule update --init --recursive
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
