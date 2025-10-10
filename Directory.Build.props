@@ -3,4 +3,10 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ProtoDefinitionsFolder>$(MSBuildThisFileDirectory)/athena-protobufs</ProtoDefinitionsFolder>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>
