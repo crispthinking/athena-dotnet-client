@@ -11,4 +11,9 @@
     <ProjectReference Include="../Resolver.Athena.Grpc/Client/Resolver.Athena.Grpc.Client.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+  </ItemGroup>
+
 </Project>

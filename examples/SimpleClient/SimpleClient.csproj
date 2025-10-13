@@ -10,6 +10,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Resolver.Athena.Grpc\Models\Resolver.Athena.Grpc.Models.csproj" />
+    <ProjectReference Include="..\..\src\Resolver.Athena\Resolver.Athena.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="dotenv.net" />
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+
 
 </Project>
