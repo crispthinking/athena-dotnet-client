@@ -2,6 +2,10 @@
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ProtoDefinitionsFolder>$(MSBuildThisFileDirectory)/athena-protobufs</ProtoDefinitionsFolder>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GitVersion.MsBuild">

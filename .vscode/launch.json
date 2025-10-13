@@ -1,0 +1,31 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug SimpleClient CLI Command",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/examples/SimpleClient/bin/Debug/net9.0/SimpleClient.dll",
+            "args": ["${input:simple-client-commands}"],
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+        },
+    ],
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "simple-client-commands",
+            "description": "which SimpleClient command do you wish to run?",
+            "options": [
+                "token-test",
+                "list-deployments"
+            ]
+        }
+    ]
+}
