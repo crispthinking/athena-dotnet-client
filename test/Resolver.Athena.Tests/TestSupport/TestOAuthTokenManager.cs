@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Resolver.Athena.Auth;
 
 namespace Resolver.Athena.Tests.TestSupport;
 

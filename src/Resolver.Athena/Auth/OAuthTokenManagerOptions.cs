@@ -1,4 +1,4 @@
-namespace Resolver.Athena;
+namespace Resolver.Athena.Auth;
 
 public record OAuthTokenManagerConfiguration
 {

@@ -2,6 +2,7 @@ using System.CommandLine;
 using dotenv.net;
 using Microsoft.Extensions.DependencyInjection;
 using Resolver.Athena;
+using Resolver.Athena.Auth;
 using Resolver.Athena.Interfaces;
 
 

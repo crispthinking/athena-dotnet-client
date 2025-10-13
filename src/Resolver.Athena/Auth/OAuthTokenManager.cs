@@ -1,4 +1,4 @@
-namespace Resolver.Athena;
+namespace Resolver.Athena.Auth;
 
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
