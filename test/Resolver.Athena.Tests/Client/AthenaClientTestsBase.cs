@@ -5,7 +5,7 @@ using Moq;
 using Resolver.Athena.Grpc;
 using Resolver.Athena.Interfaces;
 
-namespace Resolver.Athena.Tests.AthenaClientTests;
+namespace Resolver.Athena.Tests.Client;
 
 public class AthenaClientTestsBase
 {

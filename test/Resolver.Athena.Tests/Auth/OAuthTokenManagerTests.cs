@@ -5,7 +5,7 @@ using Resolver.Athena.Auth;
 using Resolver.Athena.Tests.TestSupport;
 using RichardSzalay.MockHttp;
 
-namespace Resolver.Athena.Tests;
+namespace Resolver.Athena.Tests.Auth;
 
 public class OAuthTokenManagerTests
 {

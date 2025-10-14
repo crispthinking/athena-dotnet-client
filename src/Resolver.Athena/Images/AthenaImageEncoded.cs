@@ -19,7 +19,7 @@ public class AthenaImageEncoded : AthenaImageBase
     public AthenaImageEncoded(byte[] data)
     {
         using var image = Image.Load(data);
-        var imageFormat = image?.Metadata?.DecodedImageFormat ?? throw new ArgumentNullException(nameof(data), "Image format could not be determined.");
+        var imageFormat = image?.Metadata?.DecodedImageFormat ?? throw new InvalidOperationException("Unable to determine image format.");
 
         if (image.Width != AthenaConstants.ExpectedImageWidth ||
             image.Height != AthenaConstants.ExpectedImageHeight)

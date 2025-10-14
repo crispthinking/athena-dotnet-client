@@ -2,7 +2,7 @@ using Grpc.Core;
 using Moq;
 using Resolver.Athena.Grpc;
 
-namespace Resolver.Athena.Tests.AthenaClientTests;
+namespace Resolver.Athena.Tests.Client;
 
 public class ListDeploymentsTests : AthenaClientTestsBase
 {
