@@ -3,6 +3,8 @@ using dotenv.net;
 using Microsoft.Extensions.DependencyInjection;
 using Resolver.Athena;
 using Resolver.Athena.Auth;
+using Resolver.Athena.DependencyInjection;
+using Resolver.Athena.Images;
 using Resolver.Athena.Interfaces;
 
 
@@ -25,39 +27,46 @@ defaults:
    OAUTH_AUTH_URL=https://crispthinking.auth0.com/oauth/token
 """;
 
+    private static readonly Option<string> s_dotenvPathOption = new("--dotenv", "-d")
+    {
+        Description = "Path to .env file containing configuration",
+        DefaultValueFactory = _ => ".env",
+        Recursive = true,
+    };
+
+    private static readonly Argument<string> s_imagePathArgument = new("image-path")
+    {
+        Description = "Path to the image file to classify",
+    };
+
     public static async Task Main(string[] args)
     {
-        var svcProvider = new ServiceCollection()
-            .AddHttpClient()
-            .AddLogging()
-            .Configure<OAuthTokenManagerConfiguration>(options =>
-            {
-                var newOpts = LoadOAuthOptions(".env");
-                options.ClientId = newOpts.ClientId;
-                options.ClientSecret = newOpts.ClientSecret;
-                options.Audience = newOpts.Audience;
-                options.AuthUrl = newOpts.AuthUrl;
-            })
-            .AddSingleton<ITokenManager, OAuthTokenManager>()
-            .Configure<AthenaClientFactoryConfiguration>(options =>
-            {
-                var endpoint = Environment.GetEnvironmentVariable("ATHENA_ENDPOINT") ?? throw new InvalidOperationException("ATHENA_ENDPOINT not set in environment variables.");
-                options.Endpoint = endpoint;
-            })
-            .AddSingleton<IAthenaClientFactory, AthenaClientFactory>()
-            .BuildServiceProvider();
-
         var rootCommand = new RootCommand(Description);
 
-        rootCommand.AddAthenaCommand("token-test", "Test OAuth token retrieval", svcProvider, DoTokenTestCommand);
-        rootCommand.AddAthenaCommand("list-deployments", "List deployments from Athena", svcProvider, DoListDeploymentsCommand);
+        var dotenvPathOption = new Option<string>("--dotenv", "-d")
+        {
+            Description = "Path to .env file containing configuration",
+            DefaultValueFactory = _ => ".env",
+            Recursive = true,
+        };
+        rootCommand.Options.Add(dotenvPathOption);
+
+        rootCommand.AddAthenaCommand("token-test", "Test OAuth token retrieval", DoTokenTestCommand);
+        rootCommand.AddAthenaCommand("list-deployments", "List deployments from Athena", DoListDeploymentsCommand);
+        var classifySingleCommand = rootCommand.AddAthenaCommand("classify-single", "Classify a single image", DoClassifySingleCommand);
+        classifySingleCommand.Arguments.Add(s_imagePathArgument);
 
         var parseResult = rootCommand.Parse(args);
         await parseResult.InvokeAsync();
     }
 
-    public static async Task<int> DoTokenTestCommand(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public static async Task<int> DoTokenTestCommand(ParseResult parseResult, CancellationToken cancellationToken)
     {
+        LoadDotEnv(parseResult);
+        var serviceProvider = new ServiceCollection()
+            .AddOAuthTokenManager(ConfigureOAuthTokenManagerFromEnv)
+            .BuildServiceProvider();
+
         var tokenManager = serviceProvider.GetRequiredService<ITokenManager>();
 
         try
@@ -73,9 +82,15 @@ defaults:
         }
     }
 
-    public static async Task<int> DoListDeploymentsCommand(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public static async Task<int> DoListDeploymentsCommand(ParseResult parseResult, CancellationToken cancellationToken)
     {
-        var athenaClient = serviceProvider.GetRequiredService<IAthenaClientFactory>().Create();
+        LoadDotEnv(parseResult);
+
+        var svcs = new ServiceCollection()
+            .AddAthenaClient(ConfigureAthenaClientFromEnv, ConfigureOAuthTokenManagerFromEnv)
+            .BuildServiceProvider();
+
+        var athenaClient = svcs.GetRequiredService<IAthenaClient>();
 
         try
         {
@@ -101,8 +116,72 @@ defaults:
         }
     }
 
-    private static OAuthTokenManagerConfiguration LoadOAuthOptions(string dotenvPath)
+    public static async Task<int> DoClassifySingleCommand(ParseResult parseResult, CancellationToken cancellationToken)
     {
+        LoadDotEnv(parseResult);
+        var svcs = new ServiceCollection()
+            .AddAthenaClient(ConfigureAthenaClientFromEnv, ConfigureOAuthTokenManagerFromEnv)
+            .BuildServiceProvider();
+
+        var athenaClient = svcs.GetRequiredService<IAthenaClient>();
+        var imagePath = parseResult.GetValue(s_imagePathArgument) ?? throw new InvalidOperationException("Image path argument is required.");
+
+        try
+        {
+            var imageData = await File.ReadAllBytesAsync(imagePath, cancellationToken);
+            var image = new AthenaImageEncoded(imageData);
+
+            var result = await athenaClient.ClassifySingleImageAsync(image, cancellationToken);
+
+            if (result.ErrorDetails != null)
+            {
+                Console.WriteLine($"Error: {result.ErrorDetails.Code} - {result.ErrorDetails.Message}");
+                return 1;
+            }
+
+            Console.WriteLine($"Classification Results for Correlation ID: {result.CorrelationId}");
+            foreach (var classification in result.Classifications)
+            {
+                Console.WriteLine($"- {classification.Label}: {classification.Confidence}");
+            }
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to classify image: {ex.Message}");
+            return 1;
+        }
+    }
+
+    private static Action<OAuthTokenManagerConfiguration> ConfigureOAuthTokenManagerFromEnv => options =>
+    {
+        options.ClientId = Environment.GetEnvironmentVariable("OAUTH_CLIENT_ID") ?? throw new InvalidOperationException("OAUTH_CLIENT_ID not set in environment variables.");
+        options.ClientSecret = Environment.GetEnvironmentVariable("OAUTH_CLIENT_SECRET") ?? throw new InvalidOperationException("OAUTH_CLIENT_SECRET not set in environment variables.");
+
+        if (Environment.GetEnvironmentVariable("OAUTH_AUDIENCE") is string audience)
+        {
+            options.Audience = audience;
+        }
+
+        if (Environment.GetEnvironmentVariable("OAUTH_AUTH_URL") is string authUrl)
+        {
+            options.AuthUrl = authUrl;
+        }
+    };
+
+    private static Action<AthenaClientConfiguration> ConfigureAthenaClientFromEnv => options =>
+    {
+        var endpoint = Environment.GetEnvironmentVariable("ATHENA_ENDPOINT") ?? throw new InvalidOperationException("ATHENA_ENDPOINT not set in environment variables.");
+        options.Endpoint = endpoint;
+        var affiliate = Environment.GetEnvironmentVariable("ATHENA_AFFILIATE") ?? throw new InvalidOperationException("ATHENA_AFFILIATE not set in environment variables.");
+        options.Affiliate = affiliate;
+        options.SendMd5Hash = true;
+        options.SendSha1Hash = true;
+    };
+
+    private static void LoadDotEnv(ParseResult parseResult)
+    {
+        var dotenvPath = parseResult.GetValue(s_dotenvPathOption) ?? ".env";
         if (File.Exists(dotenvPath))
         {
             DotEnv.Fluent()
@@ -115,37 +194,16 @@ defaults:
         {
             Console.WriteLine($"No .env file found at {dotenvPath}, proceeding with existing environment variables.");
         }
-
-        var clientId = Environment.GetEnvironmentVariable("OAUTH_CLIENT_ID") ?? throw new InvalidOperationException("OAUTH_CLIENT_ID not set in environment variables.");
-        var clientSecret = Environment.GetEnvironmentVariable("OAUTH_CLIENT_SECRET") ?? throw new InvalidOperationException("OAUTH_CLIENT_SECRET not set in environment variables.");
-        var audience = Environment.GetEnvironmentVariable("OAUTH_AUDIENCE");
-        var authUrl = Environment.GetEnvironmentVariable("OAUTH_AUTH_URL");
-
-        var options = new OAuthTokenManagerConfiguration
-        {
-            ClientId = clientId,
-            ClientSecret = clientSecret,
-        };
-
-        if (!string.IsNullOrEmpty(audience))
-        {
-            options.Audience = audience;
-        }
-        if (!string.IsNullOrEmpty(authUrl))
-        {
-            options.AuthUrl = authUrl;
-        }
-
-        return options;
     }
 
-    public static void AddAthenaCommand(this Command parentCommand, string name, string description, IServiceProvider serviceProvider, Func<IServiceProvider, CancellationToken, Task<int>> commandHandler)
+    public static Command AddAthenaCommand(this Command parentCommand, string name, string description, Func<ParseResult, CancellationToken, Task<int>> commandHandler)
     {
         var command = new Command(name, description);
         command.SetAction((parseResult, cancellationToken) =>
         {
-            return commandHandler(serviceProvider, cancellationToken);
+            return commandHandler(parseResult, cancellationToken);
         });
         parentCommand.Subcommands.Add(command);
+        return command;
     }
 }

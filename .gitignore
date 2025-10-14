@@ -485,3 +485,6 @@ $RECYCLE.BIN/
 
 # dotenv files - these contain secrets
 .env*
+
+# generated images - these can be regenerated with the script.
+test_support/images/*

@@ -8,6 +8,8 @@
     <PackageVersion Include="Grpc.AspNetCore" Version="2.71.0" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.71.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.72.0" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.11" />
+
     <!-- Test packages -->
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
@@ -17,8 +19,10 @@
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />
+
     <!-- Build -->
     <PackageVersion Include="GitVersion.MsBuild" Version="6.4.0" />
+
     <!-- Examples-Only Packages -->
     <PackageVersion Include="dotenv.net" Version="4.0.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
