@@ -11,26 +11,36 @@ public class AthenaClientTestsBase
 {
     protected AthenaClient _athenaClient;
     protected Mock<ClassifierService.ClassifierServiceClient> _mockGrpcClient;
+    protected Mock<ITokenManager> _mockTokenManager;
+    protected Mock<IAthenaClassifierServiceClientFactory> _mockClassifierClientFactory;
+    protected IOptions<AthenaClientConfiguration> _clientOptions;
 
     public AthenaClientTestsBase()
     {
         _mockGrpcClient = new Mock<ClassifierService.ClassifierServiceClient>();
-        var mockClassifierClientFactory = new Mock<IAthenaClassifierServiceClientFactory>();
-        mockClassifierClientFactory.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<GrpcChannelOptions>()))
+        _mockClassifierClientFactory = new Mock<IAthenaClassifierServiceClientFactory>();
+        _mockClassifierClientFactory.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<GrpcChannelOptions>()))
             .Returns(_mockGrpcClient.Object);
 
-        var mockTokenManager = new Mock<ITokenManager>();
-        mockTokenManager.Setup(tm => tm.GetTokenAsync(It.IsAny<CancellationToken>()))
+        _mockTokenManager = new Mock<ITokenManager>();
+        _mockTokenManager.Setup(tm => tm.GetTokenAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync("mock-token");
 
-        var mockOptions = new Mock<IOptions<AthenaClientConfiguration>>();
-        mockOptions.Setup(o => o.Value).Returns(new AthenaClientConfiguration
+        _clientOptions = new OptionsWrapper<AthenaClientConfiguration>(new AthenaClientConfiguration
         {
             Endpoint = "https://mock-endpoint",
             Affiliate = "test-affiliate",
+            SendMd5Hash = true,
+            SendSha1Hash = true,
         });
 
-        _athenaClient = new AthenaClient(mockTokenManager.Object, mockOptions.Object, mockClassifierClientFactory.Object);
+        _athenaClient = new AthenaClient(_mockTokenManager.Object, _clientOptions, _mockClassifierClientFactory.Object);
+    }
+
+    public AthenaClient GetAthenaClient(AthenaClientConfiguration config)
+    {
+        var options = new OptionsWrapper<AthenaClientConfiguration>(config);
+        return new AthenaClient(_mockTokenManager.Object, options, _mockClassifierClientFactory.Object);
     }
 
     public static AsyncUnaryCall<TResponse> CreateAsyncUnaryCall<TResponse>(TResponse response)
