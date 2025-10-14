@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="dotenv.net" />
+    <PackageReference Include="Google.Protobuf" VersionOverride="3.32.1" />
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
