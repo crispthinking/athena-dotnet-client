@@ -22,12 +22,20 @@ jobs:
       with:
         dotnet-version: 9.x
 
-    - run: dotnet tool update -g docfx
-    - run: dotnet tool update -g DocLinkChecker
+    - name: Build Project
+      run: dotnet build
 
-    - run: DocLinkChecker -d docs/
+    - name: Install DocFX
+      run: dotnet tool update -g docfx
 
-    - run: docfx docs/docfx.json
+    - name: Install DocLinkChecker
+      run: dotnet tool update -g DocLinkChecker
+
+    - name: Check links
+      run: DocLinkChecker -d docs/
+
+    - name: Build Docs
+      run: docfx docs/docfx.json
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
