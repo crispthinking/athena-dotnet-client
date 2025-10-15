@@ -38,6 +38,8 @@
     ],
     "globalMetadata": {
       "_appName": "AthenaDotnetClient",
+      "_appLogoPath": "images/logo.png",
+      "_appFaviconPath": "images/logo.png",
       "_appTitle": "AthenaDotnetClient",
       "_enableSearch": true,
       "pdf": false

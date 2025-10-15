@@ -4,6 +4,26 @@ This is a dotnet library for interacting with the Athena API (Resolver Unknown C
 
 Documentation can be found [here](https://crispthinking.github.io/athena-dotnet-client/).
 
+## Runnable Examples
+
+You can find runnable examples in the `examples` directory of this repository.
+
+Many examples make use of `.env` files to manage configuration. You can create
+a `.env` file in the root of the repository to set environment variables for
+the examples. Files beginning `.env` are configured to be ignored by git, to
+avoid accidentally committing sensitive information. Each example will describe
+any required configuration or command line arguments.
+
+### SimpleClient
+This example is a simple dotnet console application that can:
+- Test OAuth credentials to ensure token acquisition is working
+- Can perform a synchronous classification of a single image.
+
+To get started, run the following dotnet command:
+```bash
+dotnet run --project examples/SimpleClient/SimpleClient.csproj -- --help
+```
+
 ## Development
 
 This package is built with .NET 9.0. You can use the .NET CLI to build and test the library.
