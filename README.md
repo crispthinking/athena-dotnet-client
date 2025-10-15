@@ -47,7 +47,7 @@ If you want to run them manually, you can use:
 pre-commit run
 ```
 
-### Building the Documentation
+### Building the documentation
 
 First, ensure you have DocFX installed. You can install it via `dotnet`:
 
