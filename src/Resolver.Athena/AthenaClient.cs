@@ -35,6 +35,21 @@ public class AthenaClient : IAthenaClient
 
     public async Task<ClassificationResult> ClassifySingleImageAsync(AthenaImageBase imageData, CancellationToken cancellationToken)
     {
+        var request = PrepareInput(imageData);
+
+        var response = await _client.ClassifySingleAsync(request, cancellationToken: cancellationToken);
+
+        return ClassificationResult.FromSingleOutput(response);
+    }
+
+    public async Task<List<DeploymentSummary>> ListDeploymentsAsync(CancellationToken cancellationToken)
+    {
+        var response = await _client.ListDeploymentsAsync(new(), cancellationToken: cancellationToken);
+        return [.. response.Deployments.Select(deployment => new DeploymentSummary(deployment))];
+    }
+
+    protected ClassificationInput PrepareInput(AthenaImageBase imageData)
+    {
         var request = new ClassificationInput()
         {
             Data = ByteString.CopyFrom(imageData.GetBytes()),
@@ -61,14 +76,6 @@ public class AthenaClient : IAthenaClient
             });
         }
 
-        var response = await _client.ClassifySingleAsync(request, cancellationToken: cancellationToken);
-
-        return ClassificationResult.FromSingleOutput(response);
-    }
-
-    public async Task<List<DeploymentSummary>> ListDeploymentsAsync(CancellationToken cancellationToken)
-    {
-        var response = await _client.ListDeploymentsAsync(new(), cancellationToken: cancellationToken);
-        return [.. response.Deployments.Select(deployment => new DeploymentSummary(deployment))];
+        return request;
     }
 }
