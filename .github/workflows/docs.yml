@@ -37,6 +37,10 @@ jobs:
         path: 'docs/_site'
 
   deploy-docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
     needs: build-docs
     if: github.ref == 'refs/heads/main'
     concurrency:
