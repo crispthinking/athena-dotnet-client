@@ -2,6 +2,7 @@ using Grpc.Core;
 using Moq;
 using Resolver.Athena.Grpc;
 using Resolver.Athena.Images;
+using Resolver.Athena.Models;
 
 namespace Resolver.Athena.Tests.Client;
 
@@ -92,5 +93,46 @@ public class ClassifySingleTests : AthenaClientTestsBase
             It.IsAny<Metadata>(),
             It.IsAny<DateTime?>(),
             It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ClassifySingleAsync_WithErrorResponse_PropagatesError()
+    {
+        // Arrange
+        var imageData = new byte[AthenaConstants.ExpectedImageWidth *
+                                 AthenaConstants.ExpectedImageHeight *
+                                 AthenaConstants.ExpectedImageChannels];
+        new Random().NextBytes(imageData);
+        var athenaImage = new AthenaImageRawUInt8(imageData);
+
+        var errorResponse = new ClassificationOutput
+        {
+            CorrelationId = "1",
+            Error = new ClassificationError
+            {
+                Code = ErrorCode.ModelError,
+                Message = "Model failed to process the image",
+                Details = "Detailed error information"
+            }
+        };
+
+        _mockGrpcClient
+            .Setup(client => client.ClassifySingleAsync(
+                It.IsAny<ClassificationInput>(),
+                It.IsAny<Metadata>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(CreateAsyncUnaryCall(errorResponse));
+
+        // Act
+        var classifierOutput = await _athenaClient.ClassifySingleImageAsync(athenaImage, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(classifierOutput);
+        Assert.Equal("1", classifierOutput.CorrelationId);
+        Assert.NotNull(classifierOutput.ErrorDetails);
+        Assert.Equal(ClassificationErrorCode.ModelError, classifierOutput.ErrorDetails.Code);
+        Assert.Equal("Model failed to process the image", classifierOutput.ErrorDetails.Message);
+        Assert.Equal("Detailed error information", classifierOutput.ErrorDetails.AdditionalDetails);
     }
 }

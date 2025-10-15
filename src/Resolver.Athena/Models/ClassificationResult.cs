@@ -26,7 +26,8 @@ public class ClassificationResult
             result.ErrorDetails = new ClassificationErrorDetails
             {
                 Code = ClassificationErrorCodeExtensions.FromGrpc(output.Error.Code),
-                Message = output.Error.Message
+                Message = output.Error.Message,
+                AdditionalDetails = output.Error.Details
             };
         }
 
