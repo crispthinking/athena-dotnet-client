@@ -8,6 +8,9 @@ namespace Resolver.Athena.LowLevel;
 
 public class LowLevelStreamingClientBase
 {
+    /// <summary>
+    /// The gRPC client for the Athena Classifier Service.
+    /// </summary>
     protected ClassifierService.ClassifierServiceClient Client { get; }
 
     protected IClientStreamWriter<ClassifyRequest>? RequestStream { get; set; }
@@ -30,8 +33,20 @@ public class LowLevelStreamingClientBase
         DeploymentId = options.Value.DeploymentId;
     }
 
+    /// <summary>
+    /// Starts the gRPC streaming call and initializes the request and response streams.
+    ///
+    /// This method must be called before sending requests or receiving responses.
+    ///
+    /// This method should be overloaded in derived classes to add any additional startup logic.
+    /// </summary>
     public virtual Task StartAsync(CancellationToken cancellationToken)
     {
+        if (RequestStream != null || ResponseStream != null)
+        {
+            throw new InvalidOperationException($"Stream has already been started. Call {nameof(StopAsync)} before starting again.");
+        }
+
         var streams = Client.Classify(cancellationToken: cancellationToken);
         RequestStream = streams.RequestStream;
         ResponseStream = streams.ResponseStream;
@@ -39,6 +54,11 @@ public class LowLevelStreamingClientBase
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Stops the gRPC streaming call and cleans up the request and response streams.
+    ///
+    /// This method should be overloaded in derived classes to add any additional cleanup logic.
+    /// </summary>
     public virtual async Task StopAsync(CancellationToken cancellationToken)
     {
         if (RequestStream == null && ResponseStream == null)
