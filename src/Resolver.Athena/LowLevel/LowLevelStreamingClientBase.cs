@@ -39,16 +39,20 @@ public class LowLevelStreamingClientBase
         return Task.CompletedTask;
     }
 
-    public virtual Task StopAsync(CancellationToken cancellationToken)
+    public virtual async Task StopAsync(CancellationToken cancellationToken)
     {
         if (RequestStream == null && ResponseStream == null)
         {
-            return Task.CompletedTask;
+            return;
         }
-        RequestStream?.CompleteAsync();
+
+        if (RequestStream != null)
+        {
+            await RequestStream.CompleteAsync();
+        }
+
         RequestStream = null;
         ResponseStream = null;
-        return Task.CompletedTask;
     }
 
     /// <summary>
