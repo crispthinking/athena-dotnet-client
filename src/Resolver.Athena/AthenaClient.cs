@@ -55,7 +55,7 @@ public class AthenaClient : IAthenaClient
             Data = ByteString.CopyFrom(imageData.GetBytes()),
             Format = imageData.Format,
             Affiliate = _affiliate,
-            CorrelationId = Guid.NewGuid().ToString(),
+            CorrelationId = imageData.CorrelationId,
         };
 
         if (_sendMd5Hash)

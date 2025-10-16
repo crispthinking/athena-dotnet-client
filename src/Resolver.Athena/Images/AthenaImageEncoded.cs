@@ -15,8 +15,9 @@ public class AthenaImageEncoded : AthenaImageBase
 {
     private readonly ImageFormat _format;
     private readonly byte[] _bytes;
+    private readonly string _correlationId;
 
-    public AthenaImageEncoded(byte[] data)
+    public AthenaImageEncoded(byte[] data, string? correlationId = null)
     {
         using var image = Image.Load(data);
         var imageFormat = image?.Metadata?.DecodedImageFormat ?? throw new InvalidOperationException("Unable to determine image format.");
@@ -31,7 +32,11 @@ public class AthenaImageEncoded : AthenaImageBase
         var memStream = new MemoryStream();
         image.Save(memStream, imageFormat);
         _bytes = memStream.ToArray();
+
+        _correlationId = correlationId ?? Guid.NewGuid().ToString();
     }
+
+    public override string CorrelationId => _correlationId;
 
     public override ImageFormat Format => _format;
 

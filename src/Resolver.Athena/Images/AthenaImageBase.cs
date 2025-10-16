@@ -11,6 +11,11 @@ public abstract class AthenaImageBase
     public abstract ImageFormat Format { get; }
 
     /// <summary>
+    /// Gets a unique identifier for correlating requests and responses.
+    /// </summary>
+    public abstract string CorrelationId { get; }
+
+    /// <summary>
     /// Gets the raw byte representation of the image.
     /// </summary>
     /// <returns>A span of bytes representing the image data.</returns>
