@@ -17,7 +17,7 @@ public class BatchingLowLevelStreamingClient : LowLevelStreamingClientBase, IBat
 
     private Task? _senderTask;
 
-    public BatchingLowLevelStreamingClient(ITokenManager tokenManager, IOptions<LowLevelStreamingWithBatchingConfiguration> options, IAthenaClassifierServiceClientFactory athenaClassifierServiceClientFactory) : base(tokenManager, options, athenaClassifierServiceClientFactory)
+    public BatchingLowLevelStreamingClient(ITokenManager tokenManager, IOptions<BatchingLowLevelStreamingClientConfiguration> options, IAthenaClassifierServiceClientFactory athenaClassifierServiceClientFactory) : base(tokenManager, options, athenaClassifierServiceClientFactory)
     {
         _batchMaxSize = options.Value.MaxBatchSize;
         _channel = Channel.CreateBounded<AthenaImageBase>(new BoundedChannelOptions(options.Value.ChannelCapacity)
@@ -73,12 +73,7 @@ public class BatchingLowLevelStreamingClient : LowLevelStreamingClientBase, IBat
             // Read until we reach the batch size or the channel is empty
             while (request.Inputs.Count < _batchMaxSize && _channel.Reader.TryRead(out var imageData))
             {
-                request.Inputs.Add(new ClassificationInput()
-                {
-                    Data = Google.Protobuf.ByteString.CopyFrom(imageData.GetBytes()),
-                    Format = imageData.Format,
-                    CorrelationId = imageData.CorrelationId
-                });
+                request.Inputs.Add(PrepareInput(imageData));
             }
 
             // Send the batch & reset it if we have any items

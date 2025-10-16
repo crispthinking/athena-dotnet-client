@@ -1,4 +1,3 @@
-using Google.Protobuf;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
@@ -9,6 +8,13 @@ using Resolver.Athena.Models;
 
 namespace Resolver.Athena;
 
+/// <summary>
+/// Client for interacting with the Athena image classification service.
+///
+/// This client does not handle streaming requests. It provides methods for the
+/// 'synchronous' methods of the Athena service, such as classifying a single image
+/// or listing deployments.
+/// </summary>
 public class AthenaClient : IAthenaClient
 {
     private readonly ClassifierService.ClassifierServiceClient _client;
@@ -49,33 +55,5 @@ public class AthenaClient : IAthenaClient
     }
 
     protected ClassificationInput PrepareInput(AthenaImageBase imageData)
-    {
-        var request = new ClassificationInput()
-        {
-            Data = ByteString.CopyFrom(imageData.GetBytes()),
-            Format = imageData.Format,
-            Affiliate = _affiliate,
-            CorrelationId = imageData.CorrelationId,
-        };
-
-        if (_sendMd5Hash)
-        {
-            request.Hashes.Add(new ImageHash
-            {
-                Type = HashType.Md5,
-                Value = imageData.ComputeMd5Hash(),
-            });
-        }
-
-        if (_sendSha1Hash)
-        {
-            request.Hashes.Add(new ImageHash
-            {
-                Type = HashType.Sha1,
-                Value = imageData.ComputeSha1Hash(),
-            });
-        }
-
-        return request;
-    }
+        => imageData.ToClassificationInput(_affiliate, _sendMd5Hash, _sendSha1Hash);
 }

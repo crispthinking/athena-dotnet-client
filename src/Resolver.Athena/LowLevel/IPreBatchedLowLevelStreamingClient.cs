@@ -1,8 +1,8 @@
-using Resolver.Athena.Grpc;
+using Resolver.Athena.Images;
 
 namespace Resolver.Athena.LowLevel;
 
-public interface IPreBatchedLowLevelStreamingClient
+public interface IPreBatchedLowLevelStreamingClient : ILowLevelStreamingClient
 {
-    Task SendBatchAsync(ClassifyRequest request, CancellationToken cancellationToken);
+    Task SendBatchAsync(AthenaImageBase[] batch, CancellationToken cancellationToken);
 }

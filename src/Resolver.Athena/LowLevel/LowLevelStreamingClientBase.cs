@@ -2,11 +2,12 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
 using Resolver.Athena.Grpc;
+using Resolver.Athena.Images;
 using Resolver.Athena.Interfaces;
 
 namespace Resolver.Athena.LowLevel;
 
-public class LowLevelStreamingClientBase
+public class LowLevelStreamingClientBase : ILowLevelStreamingClient
 {
     /// <summary>
     /// The gRPC client for the Athena Classifier Service.
@@ -16,9 +17,13 @@ public class LowLevelStreamingClientBase
     protected IClientStreamWriter<ClassifyRequest>? RequestStream { get; set; }
     protected IAsyncStreamReader<ClassifyResponse>? ResponseStream { get; set; }
 
+    protected string Affiliate { get; init; }
     protected string DeploymentId { get; init; }
 
-    public LowLevelStreamingClientBase(ITokenManager tokenManager, IOptions<LowLevelStreamingConfiguration> options, IAthenaClassifierServiceClientFactory athenaClassifierServiceClientFactory)
+    private readonly bool _sendMd5Hash;
+    private readonly bool _sendSha1Hash;
+
+    public LowLevelStreamingClientBase(ITokenManager tokenManager, IOptions<LowLevelStreamingClientConfiguration> options, IAthenaClassifierServiceClientFactory athenaClassifierServiceClientFactory)
     {
         var channelOpts = new GrpcChannelOptions
         {
@@ -31,6 +36,10 @@ public class LowLevelStreamingClientBase
 
         Client = athenaClassifierServiceClientFactory.Create(options.Value.Endpoint, channelOpts);
         DeploymentId = options.Value.DeploymentId;
+        Affiliate = options.Value.Affiliate;
+
+        _sendMd5Hash = options.Value.SendMd5Hash;
+        _sendSha1Hash = options.Value.SendSha1Hash;
     }
 
     /// <summary>
@@ -88,6 +97,16 @@ public class LowLevelStreamingClientBase
         return ResponseStream.ReadAllAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Prepares a ClassificationInput message from the given AthenaImageBase.
+    /// </summary>
+    public virtual ClassificationInput PrepareInput(AthenaImageBase athenaImageBase)
+        => athenaImageBase.ToClassificationInput(Affiliate, _sendMd5Hash, _sendSha1Hash);
+
+    /// <summary>
+    /// Wraps the sending of a ClassifyRequest to the gRPC stream, ensuring
+    /// the stream has been started.
+    /// </summary>
     protected Task SendAsync(ClassifyRequest request, CancellationToken cancellationToken)
     {
         if (RequestStream == null)

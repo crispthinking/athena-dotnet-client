@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Resolver.Athena.Auth;
 using Resolver.Athena.Interfaces;
+using Resolver.Athena.LowLevel;
 
 namespace Resolver.Athena.DependencyInjection;
 
@@ -35,5 +36,23 @@ public static class ServiceExtensions
             .AddSingleton<IAthenaClassifierServiceClientFactory, AthenaClassifierServiceClientFactory>()
             .Configure(athenaClientConfigure)
             .AddSingleton<IAthenaClient, AthenaClient>();
+    }
+
+    public static IServiceCollection AddPreBatchedLowLevelStreamingClient(this IServiceCollection services, Action<LowLevelStreamingClientConfiguration> lowLevelStreamingConfigure, Action<OAuthTokenManagerConfiguration> oAuthTokenManagerConfigure)
+    {
+        return services
+            .AddOAuthTokenManager(oAuthTokenManagerConfigure)
+            .AddSingleton<IAthenaClassifierServiceClientFactory, AthenaClassifierServiceClientFactory>()
+            .Configure(lowLevelStreamingConfigure)
+            .AddSingleton<IPreBatchedLowLevelStreamingClient, PreBatchedLowLevelStreamingClient>();
+    }
+
+    public static IServiceCollection AddBatchingLowLevelStreamingClient(this IServiceCollection services, Action<BatchingLowLevelStreamingClientConfiguration> lowLevelStreamingConfigure, Action<OAuthTokenManagerConfiguration> oAuthTokenManagerConfigure)
+    {
+        return services
+            .AddOAuthTokenManager(oAuthTokenManagerConfigure)
+            .AddSingleton<IAthenaClassifierServiceClientFactory, AthenaClassifierServiceClientFactory>()
+            .Configure(lowLevelStreamingConfigure)
+            .AddSingleton<IBatchingLowLevelStreamingClient, BatchingLowLevelStreamingClient>();
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Resolver.Athena.Grpc;
+using Resolver.Athena.Images;
 using Resolver.Athena.Interfaces;
 
 namespace Resolver.Athena.LowLevel;
@@ -8,26 +9,24 @@ namespace Resolver.Athena.LowLevel;
 /// A low-level streaming client that sends pre-batched requests directly to
 /// the gRPC stream, without doing any internal batching.
 /// </summary>
-public class PreBatchedLowLevelStreamingClient(ITokenManager tokenManager, IOptions<LowLevelStreamingConfiguration> options, IAthenaClassifierServiceClientFactory athenaClassifierServiceClientFactory) : LowLevelStreamingClientBase(tokenManager, options, athenaClassifierServiceClientFactory), IPreBatchedLowLevelStreamingClient
+public class PreBatchedLowLevelStreamingClient(ITokenManager tokenManager, IOptions<LowLevelStreamingClientConfiguration> options, IAthenaClassifierServiceClientFactory athenaClassifierServiceClientFactory) : LowLevelStreamingClientBase(tokenManager, options, athenaClassifierServiceClientFactory), IPreBatchedLowLevelStreamingClient
 {
     /// <summary>
     /// Sends a pre-batched request directly to the gRPC stream.
     /// </summary>
-    public async Task SendBatchAsync(ClassifyRequest request, CancellationToken cancellationToken)
+    public async Task SendBatchAsync(AthenaImageBase[] batch, CancellationToken cancellationToken)
     {
-        if (request.Inputs.Count == 0)
+        if (batch.Length == 0)
         {
-            throw new ArgumentException("Request must contain at least one image.", nameof(request));
+            throw new ArgumentException("Batch must contain at least one image.", nameof(batch));
         }
 
-        if (request.DeploymentId is null)
+        var request = new ClassifyRequest
         {
-            request.DeploymentId = DeploymentId;
-        }
-        else if (request.DeploymentId != DeploymentId)
-        {
-            throw new ArgumentException($"Request DeploymentId '{request.DeploymentId}' does not match client DeploymentId '{DeploymentId}'.", nameof(request));
-        }
+            DeploymentId = DeploymentId
+        };
+
+        request.Inputs.AddRange(batch.Select(PrepareInput));
 
         await SendAsync(request, cancellationToken);
     }

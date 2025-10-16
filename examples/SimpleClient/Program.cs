@@ -6,6 +6,7 @@ using Resolver.Athena.Auth;
 using Resolver.Athena.DependencyInjection;
 using Resolver.Athena.Images;
 using Resolver.Athena.Interfaces;
+using Resolver.Athena.LowLevel;
 
 
 static class Program
@@ -34,9 +35,14 @@ defaults:
         Recursive = true,
     };
 
-    private static readonly Argument<string> s_imagePathArgument = new("image-path")
+    private static readonly Argument<List<string>> s_imagePathsArgument = new("image-paths")
     {
-        Description = "Path to the image file to classify",
+        Description = "One or more paths to image files to classify",
+    };
+
+    private static readonly Argument<string> s_deploymentIdArgument = new("deployment-id")
+    {
+        Description = "Deployment ID to use for classification",
     };
 
     public static async Task Main(string[] args)
@@ -54,7 +60,11 @@ defaults:
         rootCommand.AddAthenaCommand("token-test", "Test OAuth token retrieval", DoTokenTestCommand);
         rootCommand.AddAthenaCommand("list-deployments", "List deployments from Athena", DoListDeploymentsCommand);
         var classifySingleCommand = rootCommand.AddAthenaCommand("classify-single", "Classify a single image", DoClassifySingleCommand);
-        classifySingleCommand.Arguments.Add(s_imagePathArgument);
+        classifySingleCommand.Arguments.Add(s_imagePathsArgument);
+
+        var classifyStreamingCommand = rootCommand.AddAthenaCommand("classify-streaming", "Classify images using streaming with batching", DoClassifyStreamingCommand);
+        classifyStreamingCommand.Arguments.Add(s_deploymentIdArgument);
+        classifyStreamingCommand.Arguments.Add(s_imagePathsArgument);
 
         var parseResult = rootCommand.Parse(args);
         await parseResult.InvokeAsync();
@@ -124,34 +134,129 @@ defaults:
             .BuildServiceProvider();
 
         var athenaClient = svcs.GetRequiredService<IAthenaClient>();
-        var imagePath = parseResult.GetValue(s_imagePathArgument) ?? throw new InvalidOperationException("Image path argument is required.");
+        var imagePaths = parseResult.GetValue(s_imagePathsArgument) ?? throw new InvalidOperationException("Image path argument is required.");
 
-        try
+        var failureCount = 0;
+
+        foreach (var imagePath in imagePaths)
         {
-            var imageData = await File.ReadAllBytesAsync(imagePath, cancellationToken);
-            var image = new AthenaImageEncoded(imageData);
-
-            var result = await athenaClient.ClassifySingleImageAsync(image, cancellationToken);
-
-            if (result.ErrorDetails != null)
+            try
             {
-                Console.WriteLine($"Error: {result.ErrorDetails.Code} - {result.ErrorDetails.Message}");
-                return 1;
-            }
+                var imageData = await File.ReadAllBytesAsync(imagePath, cancellationToken);
+                var image = new AthenaImageEncoded(imageData);
 
-            Console.WriteLine($"Classification Results for Correlation ID: {result.CorrelationId}");
-            foreach (var classification in result.Classifications)
-            {
-                Console.WriteLine($"- {classification.Label}: {classification.Confidence}");
+                var result = await athenaClient.ClassifySingleImageAsync(image, cancellationToken);
+
+                if (result.ErrorDetails != null)
+                {
+                    Console.WriteLine($"Error: {result.ErrorDetails.Code} - {result.ErrorDetails.Message}");
+                    return 1;
+                }
+
+                Console.WriteLine($"Classification Results for Correlation ID: {result.CorrelationId}");
+                foreach (var classification in result.Classifications)
+                {
+                    Console.WriteLine($"- {classification.Label}: {classification.Confidence}");
+                }
             }
+            catch (Exception ex)
+            {
+                failureCount++;
+                Console.WriteLine($"Failed to classify image: {ex.Message}");
+            }
+        }
+        if (failureCount == 0)
+        {
+            Console.WriteLine("All images classified successfully.");
             return 0;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to classify image: {ex.Message}");
-            return 1;
-        }
+
+        Console.WriteLine($"{failureCount} image(s) failed to classify.");
+        return 1;
     }
+
+    public static async Task<int> DoClassifyStreamingCommand(ParseResult parseResult, CancellationToken cancellationToken)
+    {
+        LoadDotEnv(parseResult);
+        var svcs = new ServiceCollection()
+            .AddBatchingLowLevelStreamingClient(ConfigureBatchingLowLevelStreamingClientFromEnv(parseResult), ConfigureOAuthTokenManagerFromEnv)
+            .BuildServiceProvider();
+
+        var streamingClient = svcs.GetRequiredService<IBatchingLowLevelStreamingClient>();
+        await streamingClient.StartAsync(cancellationToken);
+
+        var imagePaths = parseResult.GetValue(s_imagePathsArgument) ?? throw new InvalidOperationException("Image path argument is required.");
+
+        await Parallel.ForEachAsync(imagePaths, async (imagePath, ct) =>
+        {
+            try
+            {
+                var imageData = await File.ReadAllBytesAsync(imagePath, ct);
+                var image = new AthenaImageEncoded(imageData);
+
+                await streamingClient.SendAsync(image, ct);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to classify image: {ex.Message}");
+            }
+
+        });
+
+        Console.WriteLine("All images sent, awaiting results...");
+
+        await foreach (var response in streamingClient.GetResponsesAsync(cancellationToken))
+        {
+            Console.WriteLine("Received a response batch:");
+            foreach (var result in response.Outputs)
+            {
+                if (result.Error != null)
+                {
+                    Console.WriteLine($"Error: {result.Error.Code} - {result.Error.Message}");
+                    continue;
+                }
+
+                Console.WriteLine($"Classification Results for Correlation ID: {result.CorrelationId}");
+                foreach (var classification in result.Classifications)
+                {
+                    Console.WriteLine($"- {classification.Label}: {classification.Weight}");
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    private static Action<BatchingLowLevelStreamingClientConfiguration> ConfigureBatchingLowLevelStreamingClientFromEnv(ParseResult parseResult) => options =>
+    {
+        options.DeploymentId = parseResult.GetValue(s_deploymentIdArgument) ?? throw new InvalidOperationException("Deployment ID argument is required.");
+        options.SendMd5Hash = true;
+        options.SendSha1Hash = true;
+
+        var endpoint = Environment.GetEnvironmentVariable("ATHENA_ENDPOINT") ?? throw new InvalidOperationException("ATHENA_ENDPOINT not set in environment variables.");
+        options.Endpoint = endpoint;
+
+        var affiliate = Environment.GetEnvironmentVariable("ATHENA_AFFILIATE") ?? throw new InvalidOperationException("ATHENA_AFFILIATE not set in environment variables.");
+        options.Affiliate = affiliate;
+
+        if (Environment.GetEnvironmentVariable("ATHENA_BATCH_SIZE") is string batchMaxSizeStr && int.TryParse(batchMaxSizeStr, out var batchMaxSize))
+        {
+            options.MaxBatchSize = batchMaxSize;
+        }
+        else
+        {
+            options.MaxBatchSize = 16; // Default value
+        }
+
+        if (Environment.GetEnvironmentVariable("ATHENA_CHANNEL_CAPACITY") is string channelCapacityStr && int.TryParse(channelCapacityStr, out var channelCapacity))
+        {
+            options.ChannelCapacity = channelCapacity;
+        }
+        else
+        {
+            options.ChannelCapacity = 100; // Default value
+        }
+    };
 
     private static Action<OAuthTokenManagerConfiguration> ConfigureOAuthTokenManagerFromEnv => options =>
     {
