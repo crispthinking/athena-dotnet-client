@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Resolver.Athena.Auth;
 using Resolver.Athena.Interfaces;
-using Resolver.Athena.LowLevel;
+using Resolver.Athena.Streaming.LowLevel;
 
 namespace Resolver.Athena.DependencyInjection;
 
