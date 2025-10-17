@@ -10,8 +10,9 @@ namespace Resolver.Athena.Images;
 public class AthenaImageRawUInt8 : AthenaImageBase
 {
     private readonly byte[] _data;
+    private readonly string _correlationId;
 
-    public AthenaImageRawUInt8(byte[] data)
+    public AthenaImageRawUInt8(byte[] data, string? correlationId = null)
     {
         var expectedBytes = AthenaConstants.ExpectedImageWidth *
                             AthenaConstants.ExpectedImageHeight *
@@ -23,7 +24,10 @@ public class AthenaImageRawUInt8 : AthenaImageBase
         }
 
         _data = data;
+        _correlationId = correlationId ?? Guid.NewGuid().ToString();
     }
+
+    public override string CorrelationId => _correlationId;
 
     public override ImageFormat Format => ImageFormat.RawUint8;
 
