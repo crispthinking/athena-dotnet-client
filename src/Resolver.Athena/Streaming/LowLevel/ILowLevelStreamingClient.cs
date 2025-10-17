@@ -1,6 +1,6 @@
 using Resolver.Athena.Grpc;
 
-namespace Resolver.Athena.LowLevel;
+namespace Resolver.Athena.Streaming.LowLevel;
 
 public interface ILowLevelStreamingClient
 {

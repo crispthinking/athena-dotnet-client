@@ -1,4 +1,4 @@
-namespace Resolver.Athena.LowLevel;
+namespace Resolver.Athena.Streaming.LowLevel;
 
 public class LowLevelStreamingClientConfiguration : AthenaClientConfiguration
 {

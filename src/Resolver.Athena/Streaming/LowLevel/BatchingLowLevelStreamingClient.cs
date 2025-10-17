@@ -4,7 +4,7 @@ using Resolver.Athena.Grpc;
 using Resolver.Athena.Images;
 using Resolver.Athena.Interfaces;
 
-namespace Resolver.Athena.LowLevel;
+namespace Resolver.Athena.Streaming.LowLevel;
 
 /// <summary>
 /// A low-level streaming client that batches incoming images with configurable

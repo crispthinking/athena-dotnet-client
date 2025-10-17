@@ -5,7 +5,7 @@ using Resolver.Athena.Grpc;
 using Resolver.Athena.Images;
 using Resolver.Athena.Interfaces;
 
-namespace Resolver.Athena.LowLevel;
+namespace Resolver.Athena.Streaming.LowLevel;
 
 public class LowLevelStreamingClientBase : ILowLevelStreamingClient
 {
@@ -46,9 +46,9 @@ public class LowLevelStreamingClientBase : ILowLevelStreamingClient
     /// Starts the gRPC streaming call and initializes the request and response streams.
     ///
     /// This method must be called before sending requests or receiving responses.
-    ///
-    /// This method should be overloaded in derived classes to add any additional startup logic.
     /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the stream has already been started.</exception>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public virtual Task StartAsync(CancellationToken cancellationToken)
     {
         if (RequestStream != null || ResponseStream != null)
@@ -65,9 +65,8 @@ public class LowLevelStreamingClientBase : ILowLevelStreamingClient
 
     /// <summary>
     /// Stops the gRPC streaming call and cleans up the request and response streams.
-    ///
-    /// This method should be overloaded in derived classes to add any additional cleanup logic.
     /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public virtual async Task StopAsync(CancellationToken cancellationToken)
     {
         if (RequestStream == null && ResponseStream == null)
@@ -87,6 +86,7 @@ public class LowLevelStreamingClientBase : ILowLevelStreamingClient
     /// <summary>
     /// Returns an async enumerable of responses from the gRPC stream.
     /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the stream has not been started.</exception>
     public IAsyncEnumerable<ClassifyResponse> GetResponsesAsync(CancellationToken cancellationToken)
     {
         if (ResponseStream == null)

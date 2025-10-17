@@ -6,7 +6,7 @@ using Resolver.Athena.Auth;
 using Resolver.Athena.DependencyInjection;
 using Resolver.Athena.Images;
 using Resolver.Athena.Interfaces;
-using Resolver.Athena.LowLevel;
+using Resolver.Athena.Streaming.LowLevel;
 
 
 static class Program
