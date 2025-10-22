@@ -1,10 +1,10 @@
-namespace Resolver.Athena.Auth;
-
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Resolver.Athena.Interfaces;
+
+namespace Resolver.Athena.Auth;
 
 /// <summary>
 /// Manages OAuth tokens for authenticating with the Athena service.
@@ -65,18 +65,18 @@ public class OAuthTokenManager(IOptions<OAuthTokenManagerConfiguration> options,
         _logger.LogInformation("Obtained new access token, expires at {Expiry}", _tokenExpiry);
     }
 
-    private class TokenResponse
+    private sealed record TokenResponse
     {
         [JsonPropertyName("access_token")]
-        public required string AccessToken { get; set; }
+        public required string AccessToken { get; init; }
 
         [JsonPropertyName("scope")]
-        public required string Scope { get; set; }
+        public required string Scope { get; init; }
 
         [JsonPropertyName("expires_in")]
-        public required int ExpiresIn { get; set; }
+        public required int ExpiresIn { get; init; }
 
         [JsonPropertyName("token_type")]
-        public required string TokenType { get; set; }
+        public required string TokenType { get; init; }
     }
 }

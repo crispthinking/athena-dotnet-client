@@ -11,6 +11,11 @@ public class AthenaImageRawUInt8 : AthenaImageBase
 {
     private readonly byte[] _data;
 
+    /// <summary>
+    /// Creates a new instance of <see cref="AthenaImageRawUInt8"/> from the provided byte array.
+    /// </summary>
+    /// <param name="data">The byte array representing the image data.</param>
+    /// <exception cref="ArgumentException">Thrown when the data length is invalid.</exception>
     public AthenaImageRawUInt8(byte[] data)
     {
         var expectedBytes = AthenaConstants.ExpectedImageWidth *
@@ -25,8 +30,10 @@ public class AthenaImageRawUInt8 : AthenaImageBase
         _data = data;
     }
 
+    /// <inheritdoc />
     public override ImageFormat Format => ImageFormat.RawUint8;
 
+    /// <inheritdoc />
     public override Span<byte> GetBytes()
     {
         return _data;

@@ -3,6 +3,9 @@ using Resolver.Athena.Grpc;
 
 namespace Resolver.Athena.Images;
 
+/// <summary>
+/// Base class for Athena image representations.
+/// </summary>
 public abstract class AthenaImageBase
 {
     /// <summary>

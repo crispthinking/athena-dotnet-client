@@ -3,6 +3,9 @@ using SixLabors.ImageSharp;
 
 namespace Resolver.Athena.Extensions;
 
+/// <summary>
+/// Extension methods for ImageSharp Image.
+/// </summary>
 public static class ImageSharpImageExtensions
 {
     public static ImageFormat ToAthenaImageFormat(this Image image)

@@ -9,6 +9,9 @@ using Resolver.Athena.Models;
 
 namespace Resolver.Athena;
 
+/// <summary>
+/// Implementation of <see cref="IAthenaClient"/> for interacting with the Athena gRPC service.
+/// </summary>
 public class AthenaClient : IAthenaClient
 {
     private readonly ClassifierService.ClassifierServiceClient _client;
@@ -16,6 +19,12 @@ public class AthenaClient : IAthenaClient
     private readonly bool _sendMd5Hash;
     private readonly bool _sendSha1Hash;
 
+    /// <summary>
+    /// Creates a new instance of <see cref="AthenaClient"/>.
+    /// </summary>
+    /// <param name="tokenManager">The token manager for handling authentication tokens.</param>
+    /// <param name="options">The configuration options for the Athena client.</param>
+    /// <param name="athenaClassifierServiceClientFactory">The factory for creating gRPC clients for the Athena classifier service.</param>
     public AthenaClient(ITokenManager tokenManager, IOptions<AthenaClientConfiguration> options, IAthenaClassifierServiceClientFactory athenaClassifierServiceClientFactory)
     {
         var channelOpts = new GrpcChannelOptions
@@ -33,6 +42,12 @@ public class AthenaClient : IAthenaClient
         _sendSha1Hash = options.Value.SendSha1Hash;
     }
 
+    /// <summary>
+    /// Classifies a single image asynchronously.
+    /// </summary>
+    /// <param name="imageData">The image data to classify.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The <see cref="ClassificationResult"/> result.</returns>
     public async Task<ClassificationResult> ClassifySingleImageAsync(AthenaImageBase imageData, CancellationToken cancellationToken)
     {
         var request = PrepareInput(imageData);
@@ -42,6 +57,11 @@ public class AthenaClient : IAthenaClient
         return ClassificationResult.FromSingleOutput(response);
     }
 
+    /// <summary>
+    /// Lists all deployments for the current affiliate asynchronously.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A list of deployment summaries.</returns>
     public async Task<List<DeploymentSummary>> ListDeploymentsAsync(CancellationToken cancellationToken)
     {
         var response = await _client.ListDeploymentsAsync(new(), cancellationToken: cancellationToken);

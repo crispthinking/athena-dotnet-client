@@ -1,5 +1,8 @@
 namespace Resolver.Athena.Interfaces;
 
+/// <summary>
+/// Contract for managing OAuth tokens.
+/// </summary>
 public interface ITokenManager
 {
     /// <summary>

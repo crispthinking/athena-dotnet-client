@@ -16,6 +16,11 @@ public class AthenaImageEncoded : AthenaImageBase
     private readonly ImageFormat _format;
     private readonly byte[] _bytes;
 
+    /// <summary>
+    /// Creates a new instance of <see cref="AthenaImageEncoded"/> from the provided byte array.
+    /// </summary>
+    /// <param name="data">The byte array representing the image data.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the image format cannot be determined.</exception>
     public AthenaImageEncoded(byte[] data)
     {
         using var image = Image.Load(data);
@@ -33,8 +38,10 @@ public class AthenaImageEncoded : AthenaImageBase
         _bytes = memStream.ToArray();
     }
 
+    /// <inheritdoc />
     public override ImageFormat Format => _format;
 
+    /// <inheritdoc />
     public override Span<byte> GetBytes()
     {
         return _bytes;

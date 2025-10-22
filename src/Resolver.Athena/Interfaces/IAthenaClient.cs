@@ -3,6 +3,9 @@ using Resolver.Athena.Models;
 
 namespace Resolver.Athena.Interfaces;
 
+/// <summary>
+/// Client interface for interacting with the Athena service.
+/// </summary>
 public interface IAthenaClient
 {
     /// <summary>

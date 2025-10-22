@@ -1,5 +1,8 @@
 namespace Resolver.Athena;
 
+/// <summary>
+/// Constants used in the Athena client.
+/// </summary>
 public static class AthenaConstants
 {
     /// <summary>
