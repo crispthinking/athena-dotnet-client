@@ -27,7 +27,7 @@ public static class ServiceCollectionExtensions
         services.AddAthenaClient(configureClient, configureTokenManager, configureStreaming);
 
         services.AddOptions<AthenaDataflowClientOptions>();
-    services.AddSingleton<IAthenaDataflowClient, AthenaDataflowClientImplementation>();
+        services.AddSingleton<IAthenaDataflowClient, AthenaDataflowClientImplementation>();
 
         if (configureDataflow is not null)
         {

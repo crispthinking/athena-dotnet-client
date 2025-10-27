@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using Resolver.Athena.Grpc;
 
 namespace Resolver.AthenaApiClient.Interfaces;
@@ -7,13 +8,6 @@ namespace Resolver.AthenaApiClient.Interfaces;
 /// </summary>
 public interface IAthenaApiClient
 {
-    /// <summary>
-    /// Creates a new bidirectional streaming session to the classifier service.
-    /// </summary>
-    /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The active classifier session.</returns>
-    Task<IAthenaSession> CreateSessionAsync(CancellationToken cancellationToken);
-
     /// <summary>
     /// Invokes the unary <c>ClassifySingle</c> RPC.
     /// </summary>
@@ -28,4 +22,12 @@ public interface IAthenaApiClient
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The raw deployment response payload.</returns>
     Task<ListDeploymentsResponse> ListDeploymentsAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Invokes the bidirectional streaming <c>Classify</c> RPC.
+    /// </summary>
+    /// <param name="requestChannel">The channel providing classification requests.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The channel providing classification responses.</returns>
+    Task<Channel<ClassifyResponse>> ClassifyAsync(ChannelReader<ClassifyRequest> requestChannel, int responseChannelCapacity, CancellationToken cancellationToken);
 }

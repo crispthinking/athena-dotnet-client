@@ -46,39 +46,39 @@ public class AthenaClient(
     {
         ArgumentNullException.ThrowIfNull(requests);
         var options = _streamingOptions.Value;
-        var channelOptions = new BoundedChannelOptions(options.ResponseChannelCapacity)
+
+        var requestsChannel = Channel.CreateBounded<ClassifyRequest>(new BoundedChannelOptions(options.RequestChannelCapacity)
         {
             SingleReader = true,
-            SingleWriter = true,
+            SingleWriter = false,
             FullMode = BoundedChannelFullMode.Wait
-        };
-        var channel = Channel.CreateBounded<ClassificationResult>(channelOptions);
+        });
 
-        var session = await _apiClient.CreateSessionAsync(cancellationToken).ConfigureAwait(false);
-        var disposed = 0;
+        var responseChannel = await _apiClient.ClassifyAsync(requestsChannel.Reader, options.ResponseChannelCapacity, cancellationToken).ConfigureAwait(false);
 
-        async Task DisposeSessionOnceAsync()
-        {
-            if (Interlocked.Exchange(ref disposed, 1) == 1)
-            {
-                return;
-            }
-
-            await session.DisposeAsync().ConfigureAwait(false);
-        }
-
-        var sendTask = SendRequestsAsync(session, channel.Writer, requests, options, DisposeSessionOnceAsync, cancellationToken);
-        var pumpTask = PumpResponsesAsync(session, channel.Writer, cancellationToken);
+        var sendTask = SendRequestsAsync(requestsChannel.Writer, requests, options, cancellationToken);
 
         Exception? sendException = null;
         Exception? sendFault = null;
         Exception? pumpFault = null;
         try
         {
-            await foreach (var result in channel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+            await foreach (var response in responseChannel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
             {
-                yield return result;
+                if (response.GlobalError is not null)
+                {
+                    var result = ClassificationResult.FromGlobalError(response.GlobalError);
+                    yield return result;
+                }
+
+                foreach (var output in response.Outputs)
+                {
+                    var result = ClassificationResult.FromSingleOutput(output);
+                    yield return result;
+                }
             }
+
+            responseChannel.Writer.TryComplete(); ;
         }
         finally
         {
@@ -90,17 +90,6 @@ public class AthenaClient(
             {
                 sendFault = ex;
             }
-
-            try
-            {
-                await pumpTask.ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                pumpFault = ex;
-            }
-
-            await DisposeSessionOnceAsync().ConfigureAwait(false);
         }
 
         if (sendFault is not null)
@@ -140,11 +129,9 @@ public class AthenaClient(
     }
 
     private async Task<Exception?> SendRequestsAsync(
-        IAthenaSession session,
-        ChannelWriter<ClassificationResult> writer,
+        ChannelWriter<ClassifyRequest> writer,
         IAsyncEnumerable<ClassificationRequest> requests,
         AthenaClientOptions options,
-        Func<Task> disposeSessionAsync,
         CancellationToken cancellationToken)
     {
         Exception? sendException = null;
@@ -162,48 +149,14 @@ public class AthenaClient(
                 };
 
                 classifyRequest.Inputs.Add(input);
-                await session.SendAsync(classifyRequest, cancellationToken).ConfigureAwait(false);
+                await writer.WriteAsync(classifyRequest, cancellationToken);
             }
-
-            await session.CompleteAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex) when (CaptureSendException(ex, cancellationToken, out sendException))
         {
             writer.TryComplete(sendException);
-            await disposeSessionAsync().ConfigureAwait(false);
         }
 
         return sendException;
-    }
-
-    private static async Task PumpResponsesAsync(
-        IAthenaSession session,
-        ChannelWriter<ClassificationResult> writer,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            await foreach (var response in session.ReadResponsesAsync(cancellationToken).ConfigureAwait(false))
-            {
-                if (response.GlobalError is not null)
-                {
-                    var result = ClassificationResult.FromGlobalError(response.GlobalError);
-                    await writer.WriteAsync(result, cancellationToken).ConfigureAwait(false);
-                    continue;
-                }
-
-                foreach (var output in response.Outputs)
-                {
-                    var result = ClassificationResult.FromSingleOutput(output);
-                    await writer.WriteAsync(result, cancellationToken).ConfigureAwait(false);
-                }
-            }
-
-            writer.TryComplete();
-        }
-        catch (Exception ex)
-        {
-            writer.TryComplete(ex);
-        }
     }
 }

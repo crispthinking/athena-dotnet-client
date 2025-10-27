@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
+using Resolver.Athena.Tests.TestSupport;
 using Resolver.AthenaApiClient.Auth;
 using Resolver.AthenaApiClient.Interfaces;
-using Resolver.Athena.Tests.TestSupport;
 using RichardSzalay.MockHttp;
 
 namespace Resolver.Athena.Tests.Auth;

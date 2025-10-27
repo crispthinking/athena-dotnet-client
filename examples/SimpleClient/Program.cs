@@ -1,4 +1,6 @@
 using System.CommandLine;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using dotenv.net;
 using Microsoft.Extensions.DependencyInjection;
 using Resolver.AthenaApiClient;
@@ -6,10 +8,7 @@ using Resolver.AthenaApiClient.Auth;
 using Resolver.AthenaApiClient.DependencyInjection;
 using Resolver.AthenaApiClient.Interfaces;
 using Resolver.AthenaClient.DependencyInjection;
-using System.Runtime.CompilerServices;
 using Resolver.AthenaClient.Images;
-using System.Text.RegularExpressions;
-using Resolver.Athena.Grpc;
 using Resolver.AthenaClient.Interfaces;
 
 
@@ -216,6 +215,8 @@ defaults:
                     : sanitized;
             }
 
+            var requestsToSend = files.Count;
+
             async IAsyncEnumerable<Resolver.AthenaClient.Models.ClassificationRequest> GenerateRequests([EnumeratorCancellation] CancellationToken ct)
             {
                 while (!ct.IsCancellationRequested)
@@ -266,16 +267,22 @@ defaults:
                 Console.WriteLine($"Repeating every {repeatSeconds} seconds. Press Ctrl+C to stop.");
             }
 
+            var consumedResponses = 0;
+            var errorResponses = 0;
+
             Console.WriteLine("[consumer] starting streaming consume");
             try
             {
                 await foreach (var result in athenaClient.ClassifyAsync(GenerateRequests(cancellationToken), cancellationToken))
                 {
+                    consumedResponses++;
                     if (result.ErrorDetails != null)
                     {
+                        errorResponses++;
                         Console.WriteLine($"Error: {result.ErrorDetails.Code} - {result.ErrorDetails.Message}");
                         continue;
                     }
+
 
                     Console.WriteLine($"Classification Results for Correlation ID: {result.CorrelationId}");
                     if (result.Classifications == null || result.Classifications.Count == 0)
@@ -289,7 +296,14 @@ defaults:
                             Console.WriteLine($"- {classification.Label}: {classification.Confidence}");
                         }
                     }
+
+                    if (repeatSeconds == 0 && consumedResponses >= requestsToSend)
+                    {
+                        Console.WriteLine("[consume] All requests processed, ending stream.");
+                        break;
+                    }
                 }
+
             }
             catch (Exception ex)
             {
@@ -300,6 +314,13 @@ defaults:
             {
                 Console.WriteLine("[consumer] streaming ended");
             }
+
+            Console.WriteLine("Stream Summary:");
+            Console.WriteLine($"- Total Requests Sent: {requestsToSend}");
+            Console.WriteLine($"- Total Responses Consumed: {consumedResponses}");
+            Console.WriteLine($"- Total Successful Responses: {consumedResponses - errorResponses}");
+            Console.WriteLine($"- Total Error Responses: {errorResponses}");
+            Console.WriteLine($"- Error Rate: {(consumedResponses > 0 ? (double)errorResponses / consumedResponses * 100.0 : 0.0):F2}%");
 
             return 0;
         }

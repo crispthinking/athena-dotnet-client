@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
@@ -9,9 +10,12 @@ namespace Resolver.AthenaApiClient.Clients;
 /// <summary>
 /// Default implementation of <see cref="IAthenaApiClient"/>.
 /// </summary>
-public sealed class AthenaApiClient : IAthenaApiClient
+public sealed class AthenaApiClient : IAthenaApiClient, IDisposable
 {
     private readonly ClassifierService.ClassifierServiceClient _client;
+
+    private Task? _senderTask = null;
+    private Task? _receiverTask = null;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AthenaApiClient"/> class.
@@ -40,14 +44,6 @@ public sealed class AthenaApiClient : IAthenaApiClient
     }
 
     /// <inheritdoc />
-    public Task<IAthenaSession> CreateSessionAsync(CancellationToken cancellationToken)
-    {
-        var call = _client.Classify(cancellationToken: cancellationToken);
-        IAthenaSession session = new AthenaSession(call);
-        return Task.FromResult(session);
-    }
-
-    /// <inheritdoc />
     public async Task<ClassificationOutput> ClassifySingleAsync(ClassificationInput input, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -58,5 +54,79 @@ public sealed class AthenaApiClient : IAthenaApiClient
     public async Task<ListDeploymentsResponse> ListDeploymentsAsync(CancellationToken cancellationToken)
     {
         return await _client.ListDeploymentsAsync(new Google.Protobuf.WellKnownTypes.Empty(), cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public Task<Channel<ClassifyResponse>> ClassifyAsync(ChannelReader<ClassifyRequest> requestChannel, int responseChannelCapacity, CancellationToken cancellationToken)
+    {
+        if (_senderTask != null || _receiverTask != null)
+        {
+            throw new InvalidOperationException("ClassifyAsync can only be called once per AthenaApiClient instance.");
+        }
+
+        var call = _client.Classify(cancellationToken: cancellationToken);
+
+        var responseChannel = Channel.CreateBounded<ClassifyResponse>(new BoundedChannelOptions(responseChannelCapacity)
+        {
+            SingleReader = true,
+            SingleWriter = true,
+            FullMode = BoundedChannelFullMode.Wait
+        });
+
+        _senderTask = SenderLoopAsync(requestChannel, call.RequestStream, cancellationToken);
+        _receiverTask = ReceiverLoopAsync(responseChannel, call.ResponseStream, cancellationToken);
+
+        return Task.FromResult(responseChannel);
+    }
+
+    private static async Task SenderLoopAsync(ChannelReader<ClassifyRequest> requestChannel, IClientStreamWriter<ClassifyRequest> requestStream, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await foreach (var req in requestChannel.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+            {
+                await requestStream.WriteAsync(req, cancellationToken).ConfigureAwait(false);
+            }
+
+            await requestStream.CompleteAsync().ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // best-effort attempt to complete gRPC stream
+            try
+            {
+                await requestStream.CompleteAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+            }
+        }
+        catch (Exception)
+        {
+            await requestStream.CompleteAsync();
+            throw;
+        }
+    }
+
+    private static async Task ReceiverLoopAsync(Channel<ClassifyResponse> responseChannel, IAsyncStreamReader<ClassifyResponse> responseStream, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await foreach (var resp in responseStream.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+            {
+                await responseChannel.Writer.WriteAsync(resp, cancellationToken).ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            responseChannel.Writer.TryComplete(ex);
+            throw;
+        }
+    }
+
+    public void Dispose()
+    {
+        _senderTask?.Dispose();
+        _receiverTask?.Dispose();
     }
 }
