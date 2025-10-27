@@ -10,10 +10,9 @@ public class ListDeploymentsTests : AthenaClientTestsBase
     public async Task ListDeploymentsAsync_WithEmptyResponse()
     {
         // Arrange
-        _mockGrpcClient
-            .Setup(client => client
-                    .ListDeploymentsAsync(It.IsAny<Google.Protobuf.WellKnownTypes.Empty>(), It.IsAny<Metadata>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
-            .Returns(CreateAsyncUnaryCall(new ListDeploymentsResponse()));
+        _mockLowLevelClient
+            .Setup(client => client.ListDeploymentsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ListDeploymentsResponse());
 
         // Act
         var deployments = await _athenaClient.ListDeploymentsAsync(CancellationToken.None);
@@ -33,10 +32,9 @@ public class ListDeploymentsTests : AthenaClientTestsBase
         };
         var response = new ListDeploymentsResponse();
         response.Deployments.Add(deployment);
-        _mockGrpcClient
-            .Setup(client => client
-                    .ListDeploymentsAsync(It.IsAny<Google.Protobuf.WellKnownTypes.Empty>(), It.IsAny<Metadata>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
-            .Returns(CreateAsyncUnaryCall(response));
+        _mockLowLevelClient
+            .Setup(client => client.ListDeploymentsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(response);
 
         // Act
         var deployments = await _athenaClient.ListDeploymentsAsync(CancellationToken.None);
@@ -64,10 +62,9 @@ public class ListDeploymentsTests : AthenaClientTestsBase
             response.Deployments.Add(deployment);
         }
 
-        _mockGrpcClient
-            .Setup(client => client
-                    .ListDeploymentsAsync(It.IsAny<Google.Protobuf.WellKnownTypes.Empty>(), It.IsAny<Metadata>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
-            .Returns(CreateAsyncUnaryCall(response));
+        _mockLowLevelClient
+            .Setup(client => client.ListDeploymentsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(response);
 
         // Act
         var deployments = await _athenaClient.ListDeploymentsAsync(CancellationToken.None);

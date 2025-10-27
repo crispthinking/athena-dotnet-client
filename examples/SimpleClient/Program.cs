@@ -1,14 +1,19 @@
 using System.CommandLine;
 using dotenv.net;
 using Microsoft.Extensions.DependencyInjection;
-using Resolver.Athena;
-using Resolver.Athena.Auth;
-using Resolver.Athena.DependencyInjection;
-using Resolver.Athena.Images;
-using Resolver.Athena.Interfaces;
+using Resolver.AthenaApiClient;
+using Resolver.AthenaApiClient.Auth;
+using Resolver.AthenaApiClient.DependencyInjection;
+using Resolver.AthenaApiClient.Interfaces;
+using Resolver.AthenaClient.DependencyInjection;
+using System.Runtime.CompilerServices;
+using Resolver.AthenaClient.Images;
+using System.Text.RegularExpressions;
+using Resolver.Athena.Grpc;
+using Resolver.AthenaClient.Interfaces;
 
 
-static class Program
+static partial class Program
 {
     public const string Description = """
 Athena Simple CLI
@@ -39,22 +44,32 @@ defaults:
         Description = "Path to the image file to classify",
     };
 
+    private static readonly Argument<string> s_deploymentIdArgument = new("deployment-id")
+    {
+        Description = "Deployment ID to target for streaming classify",
+    };
+
+    private static readonly Option<int> s_repeatOption = new("--repeat", "-r")
+    {
+        Description = "If set to >0, repeat sending images every N seconds until cancelled",
+        DefaultValueFactory = _ => 0,
+    };
+
     public static async Task Main(string[] args)
     {
         var rootCommand = new RootCommand(Description);
 
-        var dotenvPathOption = new Option<string>("--dotenv", "-d")
-        {
-            Description = "Path to .env file containing configuration",
-            DefaultValueFactory = _ => ".env",
-            Recursive = true,
-        };
-        rootCommand.Options.Add(dotenvPathOption);
+        // reuse the pre-defined static option so LoadDotEnv can access the same option
+        rootCommand.Options.Add(s_dotenvPathOption);
 
         rootCommand.AddAthenaCommand("token-test", "Test OAuth token retrieval", DoTokenTestCommand);
         rootCommand.AddAthenaCommand("list-deployments", "List deployments from Athena", DoListDeploymentsCommand);
-        var classifySingleCommand = rootCommand.AddAthenaCommand("classify-single", "Classify a single image", DoClassifySingleCommand);
+        var classifySingleCommand = rootCommand.AddAthenaCommand("classify-single", "Classify a single image ", DoClassifySingleCommand);
         classifySingleCommand.Arguments.Add(s_imagePathArgument);
+        var classifyStreamCommand = rootCommand.AddAthenaCommand("classify", "Classify images", DoClassifyCommand);
+        classifyStreamCommand.Options.Add(s_repeatOption);
+        classifyStreamCommand.Arguments.Add(s_deploymentIdArgument);
+        classifyStreamCommand.Arguments.Add(s_imagePathArgument);
 
         var parseResult = rootCommand.Parse(args);
         await parseResult.InvokeAsync();
@@ -131,7 +146,7 @@ defaults:
             var imageData = await File.ReadAllBytesAsync(imagePath, cancellationToken);
             var image = new AthenaImageEncoded(imageData);
 
-            var result = await athenaClient.ClassifySingleImageAsync(image, cancellationToken);
+            var result = await athenaClient.ClassifySingleAsync(image, cancellationToken);
 
             if (result.ErrorDetails != null)
             {
@@ -153,6 +168,148 @@ defaults:
         }
     }
 
+    public static async Task<int> DoClassifyCommand(ParseResult parseResult, CancellationToken cancellationToken)
+    {
+        LoadDotEnv(parseResult);
+
+        var svcs = new ServiceCollection()
+            .AddAthenaClient(ConfigureAthenaClientFromEnv, ConfigureOAuthTokenManagerFromEnv)
+            .BuildServiceProvider();
+
+        var athenaClient = svcs.GetRequiredService<IAthenaClient>();
+        var deploymentId = parseResult.GetValue(s_deploymentIdArgument) ?? throw new InvalidOperationException("deployment-id argument is required.");
+        var path = parseResult.GetValue(s_imagePathArgument) ?? throw new InvalidOperationException("Image path argument is required.");
+
+        var repeatSeconds = parseResult.GetValue(s_repeatOption);
+
+        try
+        {
+            // gather files: if a directory is provided, enumerate common image extensions; otherwise treat as single file
+            List<string> files = [];
+            if (Directory.Exists(path))
+            {
+                var exts = new[] { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
+                files.AddRange(Directory.EnumerateFiles(path, "*", SearchOption.TopDirectoryOnly)
+                    .Where(f => exts.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase)));
+            }
+            else if (File.Exists(path))
+            {
+                files.Add(path);
+            }
+            else
+            {
+                Console.WriteLine($"Provided path does not exist: {path}");
+                return 1;
+            }
+
+            if (files.Count == 0)
+            {
+                Console.WriteLine("No image files found at the provided path.");
+                return 0;
+            }
+
+            static string SanitizeCorrelation(string raw)
+            {
+                var sanitized = CorrelationIdRegex().Replace(raw, "_");
+                return string.IsNullOrWhiteSpace(sanitized)
+                    ? Guid.NewGuid().ToString("N")
+                    : sanitized;
+            }
+
+            async IAsyncEnumerable<Resolver.AthenaClient.Models.ClassificationRequest> GenerateRequests([EnumeratorCancellation] CancellationToken ct)
+            {
+                while (!ct.IsCancellationRequested)
+                {
+                    foreach (var file in files)
+                    {
+                        ct.ThrowIfCancellationRequested();
+
+                        byte[] data;
+                        try
+                        {
+                            data = await File.ReadAllBytesAsync(file, ct).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to read file {file}: {ex.Message}");
+                            continue;
+                        }
+
+                        var image = new AthenaImageEncoded(data);
+                        var rawCorrelation = Path.GetFileNameWithoutExtension(file) ?? string.Empty;
+                        var sanitized = SanitizeCorrelation(rawCorrelation);
+
+                        Console.WriteLine($"Sending file: {file} (correlation: {sanitized})");
+
+                        yield return new Resolver.AthenaClient.Models.ClassificationRequest(deploymentId, image, sanitized);
+                    }
+
+                    if (repeatSeconds <= 0)
+                    {
+                        yield break;
+                    }
+
+                    Console.WriteLine($"Waiting {repeatSeconds} seconds before next cycle...");
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(repeatSeconds), ct).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        yield break;
+                    }
+                }
+            }
+
+            if (repeatSeconds > 0)
+            {
+                Console.WriteLine($"Repeating every {repeatSeconds} seconds. Press Ctrl+C to stop.");
+            }
+
+            Console.WriteLine("[consumer] starting streaming consume");
+            try
+            {
+                await foreach (var result in athenaClient.ClassifyAsync(GenerateRequests(cancellationToken), cancellationToken))
+                {
+                    if (result.ErrorDetails != null)
+                    {
+                        Console.WriteLine($"Error: {result.ErrorDetails.Code} - {result.ErrorDetails.Message}");
+                        continue;
+                    }
+
+                    Console.WriteLine($"Classification Results for Correlation ID: {result.CorrelationId}");
+                    if (result.Classifications == null || result.Classifications.Count == 0)
+                    {
+                        Console.WriteLine("- <no classifications returned>");
+                    }
+                    else
+                    {
+                        foreach (var classification in result.Classifications)
+                        {
+                            Console.WriteLine($"- {classification.Label}: {classification.Confidence}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[consumer] streaming exception: {ex.GetType().FullName} - {ex.Message}");
+                Console.WriteLine(ex);
+            }
+            finally
+            {
+                Console.WriteLine("[consumer] streaming ended");
+            }
+
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to classify images (stream): {ex.Message}");
+            return 1;
+        }
+    }
+
     private static Action<OAuthTokenManagerConfiguration> ConfigureOAuthTokenManagerFromEnv => options =>
     {
         options.ClientId = Environment.GetEnvironmentVariable("OAUTH_CLIENT_ID") ?? throw new InvalidOperationException("OAUTH_CLIENT_ID not set in environment variables.");
@@ -169,7 +326,7 @@ defaults:
         }
     };
 
-    private static Action<AthenaClientConfiguration> ConfigureAthenaClientFromEnv => options =>
+    private static Action<AthenaApiClientConfiguration> ConfigureAthenaClientFromEnv => options =>
     {
         var endpoint = Environment.GetEnvironmentVariable("ATHENA_ENDPOINT") ?? throw new InvalidOperationException("ATHENA_ENDPOINT not set in environment variables.");
         options.Endpoint = endpoint;
@@ -206,4 +363,7 @@ defaults:
         parentCommand.Subcommands.Add(command);
         return command;
     }
+
+    [GeneratedRegex("[^A-Za-z0-9_-]")]
+    private static partial Regex CorrelationIdRegex();
 }
