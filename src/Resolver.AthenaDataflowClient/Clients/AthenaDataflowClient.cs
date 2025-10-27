@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Options;
 using Resolver.Athena.Grpc;
@@ -33,7 +34,14 @@ public sealed class AthenaDataflowClient(
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var pipelineToken = linkedCts.Token;
 
-        var session = await _apiClient.CreateSessionAsync(pipelineToken).ConfigureAwait(false);
+        var requestChannel = Channel.CreateBounded<ClassifyRequest>(new BoundedChannelOptions(streamingOptions.RequestChannelCapacity)
+        {
+            SingleReader = true,
+            SingleWriter = false,
+            FullMode = BoundedChannelFullMode.Wait
+        });
+
+        var responseChannel = await _apiClient.ClassifyAsync(requestChannel.Reader, streamingOptions.ResponseChannelCapacity, pipelineToken).ConfigureAwait(false);
         var outputBuffer = new BufferBlock<ClassificationResult>(new DataflowBlockOptions
         {
             BoundedCapacity = dataflowOptions.ResponseBufferCapacity,
@@ -41,7 +49,7 @@ public sealed class AthenaDataflowClient(
         });
 
         var sendBlock = new ActionBlock<ClassificationRequest>(
-            request => SendAsync(session, request, streamingOptions, pipelineToken),
+            request => SendAsync(requestChannel.Writer, request, streamingOptions, pipelineToken),
             new ExecutionDataflowBlockOptions
             {
                 CancellationToken = pipelineToken,
@@ -49,8 +57,8 @@ public sealed class AthenaDataflowClient(
                 MaxDegreeOfParallelism = dataflowOptions.MaxWriteDegreeOfParallelism
             });
 
-        var responsePump = PumpResponsesAsync(session, outputBuffer, pipelineToken);
-        var completionTask = MonitorPipelineAsync(session, sendBlock, responsePump, outputBuffer, linkedCts);
+        var responsePump = PumpResponsesAsync(responseChannel.Reader, outputBuffer, pipelineToken);
+        var completionTask = MonitorPipelineAsync(requestChannel.Writer, sendBlock, responsePump, outputBuffer, linkedCts);
 
         async ValueTask DisposeAsync()
         {
@@ -73,7 +81,7 @@ public sealed class AthenaDataflowClient(
         return new AthenaDataflowPipeline(sendBlock, outputBuffer, completionTask, DisposeAsync);
     }
 
-    private async Task SendAsync(IAthenaSession session, ClassificationRequest request, AthenaClientOptions options, CancellationToken cancellationToken)
+    private async Task SendAsync(ChannelWriter<ClassifyRequest> channel, ClassificationRequest request, AthenaClientOptions options, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         var correlationId = request.CorrelationId ?? options.CorrelationIdFactory();
@@ -85,17 +93,17 @@ public sealed class AthenaDataflowClient(
         };
 
         classifyRequest.Inputs.Add(input);
-        await session.SendAsync(classifyRequest, cancellationToken).ConfigureAwait(false);
+        await channel.WriteAsync(classifyRequest, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task PumpResponsesAsync(
-        IAthenaSession session,
+        ChannelReader<ClassifyResponse> channel,
         BufferBlock<ClassificationResult> outputBuffer,
         CancellationToken cancellationToken)
     {
         try
         {
-            await foreach (var response in session.ReadResponsesAsync(cancellationToken).ConfigureAwait(false))
+            await foreach (var response in channel.ReadAllAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (response.GlobalError is not null)
                 {
@@ -126,7 +134,7 @@ public sealed class AthenaDataflowClient(
     }
 
     private static async Task MonitorPipelineAsync(
-        IAthenaSession session,
+        ChannelWriter<ClassifyRequest> requestChannel,
         ActionBlock<ClassificationRequest> sendBlock,
         Task responsePump,
         BufferBlock<ClassificationResult> outputBuffer,
@@ -146,7 +154,7 @@ public sealed class AthenaDataflowClient(
         {
             try
             {
-                await session.CompleteAsync(CancellationToken.None).ConfigureAwait(false);
+                requestChannel.TryComplete(failure);
             }
             catch (Exception ex)
             {
@@ -161,10 +169,6 @@ public sealed class AthenaDataflowClient(
         catch (Exception ex)
         {
             failure ??= ex;
-        }
-        finally
-        {
-            await session.DisposeAsync().ConfigureAwait(false);
         }
 
         if (failure is not null)

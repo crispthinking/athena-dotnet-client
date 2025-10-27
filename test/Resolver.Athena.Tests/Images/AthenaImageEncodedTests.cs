@@ -1,5 +1,5 @@
-using Resolver.AthenaApiClient;
 using Resolver.Athena.Grpc;
+using Resolver.AthenaApiClient;
 using Resolver.AthenaClient.Images;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;

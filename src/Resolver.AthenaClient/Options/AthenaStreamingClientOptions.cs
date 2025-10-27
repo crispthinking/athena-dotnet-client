@@ -6,6 +6,7 @@ namespace Resolver.AthenaClient.Options;
 public sealed class AthenaClientOptions
 {
     private int _responseChannelCapacity = 256;
+    private int _requestChannelCapacity = 256;
 
     /// <summary>
     /// Gets or sets the capacity of the channel used to buffer results.
@@ -14,6 +15,16 @@ public sealed class AthenaClientOptions
     {
         get => _responseChannelCapacity;
         set => _responseChannelCapacity = value > 0 ? value : throw new ArgumentOutOfRangeException(nameof(value), "Response channel capacity must be greater than zero.");
+    }
+
+
+    /// <summary>
+    /// Gets or sets the capacity of the channel used to buffer results.
+    /// </summary>
+    public int RequestChannelCapacity
+    {
+        get => _requestChannelCapacity;
+        set => _requestChannelCapacity = value > 0 ? value : throw new ArgumentOutOfRangeException(nameof(value), "Request channel capacity must be greater than zero.");
     }
 
     /// <summary>
