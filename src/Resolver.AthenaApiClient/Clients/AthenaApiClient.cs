@@ -73,13 +73,13 @@ public sealed class AthenaApiClient : IAthenaApiClient, IDisposable
             FullMode = BoundedChannelFullMode.Wait
         });
 
-        _senderTask = SenderLoopAsync(requestChannel, call.RequestStream, cancellationToken);
-        _receiverTask = ReceiverLoopAsync(responseChannel, call.ResponseStream, cancellationToken);
+        _senderTask = RequestLoopAsync(requestChannel, call.RequestStream, cancellationToken);
+        _receiverTask = ResponseLoopAsync(responseChannel, call.ResponseStream, cancellationToken);
 
         return Task.FromResult(responseChannel);
     }
 
-    private static async Task SenderLoopAsync(ChannelReader<ClassifyRequest> requestChannel, IClientStreamWriter<ClassifyRequest> requestStream, CancellationToken cancellationToken)
+    private static async Task RequestLoopAsync(ChannelReader<ClassifyRequest> requestChannel, IClientStreamWriter<ClassifyRequest> requestStream, CancellationToken cancellationToken)
     {
         try
         {
@@ -108,7 +108,7 @@ public sealed class AthenaApiClient : IAthenaApiClient, IDisposable
         }
     }
 
-    private static async Task ReceiverLoopAsync(Channel<ClassifyResponse> responseChannel, IAsyncStreamReader<ClassifyResponse> responseStream, CancellationToken cancellationToken)
+    private static async Task ResponseLoopAsync(Channel<ClassifyResponse> responseChannel, IAsyncStreamReader<ClassifyResponse> responseStream, CancellationToken cancellationToken)
     {
         try
         {
@@ -116,6 +116,7 @@ public sealed class AthenaApiClient : IAthenaApiClient, IDisposable
             {
                 await responseChannel.Writer.WriteAsync(resp, cancellationToken).ConfigureAwait(false);
             }
+            responseChannel.Writer.TryComplete();
         }
         catch (Exception ex)
         {
