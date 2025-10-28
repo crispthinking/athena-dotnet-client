@@ -147,7 +147,17 @@ public class AthenaApiClientTests()
 
         Assert.Equal(responses.Count, sentResponses.Count);
 
+        foreach (var (expected, sent) in responses.Zip(sentResponses))
+        {
+            Assert.Equal(expected, sent);
+        }
+
         Assert.Equal(requests.Count, _sentRequests.Count);
+
+        foreach (var (expected, sent) in requests.Zip(_sentRequests))
+        {
+            Assert.Equal(expected, sent);
+        }
     }
 
     private static async Task<Channel<ClassifyRequest>> CreateChannelWithDataAsync(IEnumerable<ClassifyRequest> requests)
@@ -225,14 +235,4 @@ public class AthenaApiClientTests()
 
         return response;
     }
-}
-
-internal class FakeAsyncStreamReader<T>(IEnumerable<T> items) : IAsyncStreamReader<T>
-{
-    private readonly IEnumerator<T> _enumerator = items.GetEnumerator();
-
-    public T Current => _enumerator.Current;
-
-    public Task<bool> MoveNext(CancellationToken cancellationToken)
-        => Task.FromResult(_enumerator.MoveNext());
 }
