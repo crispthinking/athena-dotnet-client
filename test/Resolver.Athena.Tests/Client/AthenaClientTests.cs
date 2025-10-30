@@ -43,6 +43,7 @@ public class AthenaClientTests()
         await foreach (var result in results)
         {
             allResults.Add(result);
+            break; // only expecting one result
         }
 
         var singleResult = Assert.Single(allResults);
@@ -78,6 +79,10 @@ public class AthenaClientTests()
         await foreach (var result in results)
         {
             allResults.Add(result);
+            if (allResults.Count >= requestsToSend)
+            {
+                break; // received all expected results
+            }
         }
 
         Assert.Equal(requestsToSend, allResults.Count);

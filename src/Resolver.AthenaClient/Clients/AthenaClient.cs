@@ -77,8 +77,6 @@ public class AthenaClient(
                     yield return result;
                 }
             }
-
-            responseChannel.Writer.TryComplete(); ;
         }
         finally
         {
@@ -151,10 +149,6 @@ public class AthenaClient(
                 classifyRequest.Inputs.Add(input);
                 await writer.WriteAsync(classifyRequest, cancellationToken);
             }
-
-            // If we reach the end of the requests, complete the writer to
-            // allow graceful completion.
-            writer.TryComplete();
         }
         catch (Exception ex) when (CaptureSendException(ex, cancellationToken, out sendException))
         {
