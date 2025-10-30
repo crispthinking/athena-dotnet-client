@@ -1,6 +1,6 @@
 using Grpc.Core;
 
-namespace Resolver.Athena.Tests.Client;
+namespace Resolver.Athena.Tests.TestSupport;
 
 internal class FakeAsyncStreamReader<T>(IEnumerable<T> items) : IAsyncStreamReader<T>
 {

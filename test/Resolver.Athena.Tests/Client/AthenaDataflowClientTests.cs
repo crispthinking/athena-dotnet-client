@@ -53,7 +53,7 @@ public class AthenaDataflowClientTests
     public async Task Pipeline_ProcessesSingleRequestAndResponse()
     {
         // Arrange
-        var apiClient = new FakeAthenaApiClient.FakeAthenaApiClientBuilder()
+        var apiClient = FakeAthenaApiClient.Builder
             .WithQueuedResponse([("ferret", 0.9f), ("guinea pig", 0.1f)])
             .Build();
 
@@ -89,7 +89,7 @@ public class AthenaDataflowClientTests
         // Arrange
         var inputCount = 100;
 
-        var builder = new FakeAthenaApiClient.FakeAthenaApiClientBuilder();
+        var builder = FakeAthenaApiClient.Builder;
         for (var i = 0; i < inputCount; i++)
         {
             builder = builder.WithQueuedResponse([("ferret", 0.9f), ("guinea pig", 0.1f)]);
@@ -152,7 +152,7 @@ public class AthenaDataflowClientTests
         // Arrange
         var inputCount = 100;
 
-        var builder = new FakeAthenaApiClient.FakeAthenaApiClientBuilder();
+        var builder = FakeAthenaApiClient.Builder;
         for (var i = 0; i < inputCount / 2; i++)
         {
             builder = builder.WithQueuedResponse(
@@ -217,7 +217,7 @@ public class AthenaDataflowClientTests
         var validInputCount = 5;
         var errorInputCount = 3;
 
-        var builder = new FakeAthenaApiClient.FakeAthenaApiClientBuilder();
+        var builder = FakeAthenaApiClient.Builder;
         for (var i = 0; i < validInputCount; i++)
         {
             builder = builder.WithQueuedResponse([("ferret", 0.9f), ("guinea pig", 0.1f)]);
