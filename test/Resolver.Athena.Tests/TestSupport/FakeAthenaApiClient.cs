@@ -9,10 +9,13 @@ namespace Resolver.Athena.Tests.TestSupport;
 /// </summary>
 public class FakeAthenaApiClient(Queue<ClassifyResponse> providedResponses) : IAthenaApiClient
 {
+
     private readonly Queue<ClassifyResponse> _providedResponses = providedResponses;
     private readonly List<ClassifyRequest> _receivedRequests = [];
 
     public IReadOnlyList<ClassifyRequest> ReceivedRequests => _receivedRequests;
+
+    public static FakeAthenaApiClientBuilder Builder => new();
 
     public Task<Channel<ClassifyResponse>> ClassifyAsync(ChannelReader<ClassifyRequest> requestChannel, int responseChannelCapacity, CancellationToken cancellationToken)
     {

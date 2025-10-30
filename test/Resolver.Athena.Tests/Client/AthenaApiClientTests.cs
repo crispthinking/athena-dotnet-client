@@ -5,6 +5,7 @@ using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
 using Moq;
 using Resolver.Athena.Grpc;
+using Resolver.Athena.Tests.TestSupport;
 using Resolver.AthenaApiClient;
 using Resolver.AthenaApiClient.Interfaces;
 
