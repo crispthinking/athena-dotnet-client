@@ -1,7 +1,6 @@
 using System.Threading.Channels;
 using Resolver.Athena.Grpc;
 using Resolver.AthenaApiClient.Interfaces;
-using Resolver.AthenaClient.Models;
 
 namespace Resolver.Athena.Tests.TestSupport;
 
@@ -29,6 +28,10 @@ public class FakeAthenaApiClient(Queue<ClassifyResponse> providedResponses) : IA
             await foreach (var request in requestChannel.ReadAllAsync(cancellationToken))
             {
                 _receivedRequests.Add(request);
+                if (_providedResponses.Count == 0)
+                {
+                    continue;
+                }
                 var response = _providedResponses.Dequeue();
                 for (var i = 0; i < response.Outputs.Count; i++)
                 {
@@ -39,7 +42,12 @@ public class FakeAthenaApiClient(Queue<ClassifyResponse> providedResponses) : IA
                     }
                     else
                     {
-                        response.Outputs[i].CorrelationId = null;
+                        // provide a dummy correlation id, since there is no
+                        // matching input - means batches are differntly sized
+                        // on input vs output. This only happens in the testing
+                        // since we arent actually processing inputs and
+                        // assigning real correlation ids.
+                        response.Outputs[i].CorrelationId = "test-correlation-id";
                     }
                 }
                 await responseChannel.Writer.WriteAsync(response, cancellationToken);
@@ -136,12 +144,5 @@ public class FakeAthenaApiClient(Queue<ClassifyResponse> providedResponses) : IA
         {
             return new FakeAthenaApiClient(_providedResponses);
         }
-    }
-
-    private class FakeApiResponse
-    {
-        public ClassifyResponse? SuccessResponse { get; set; }
-
-        public Exception? Exception { get; set; }
     }
 }
