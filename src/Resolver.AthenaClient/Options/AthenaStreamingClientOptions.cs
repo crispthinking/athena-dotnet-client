@@ -19,7 +19,7 @@ public sealed class AthenaClientOptions
 
 
     /// <summary>
-    /// Gets or sets the capacity of the channel used to buffer results.
+    /// Gets or sets the capacity of the channel used to buffer requests.
     /// </summary>
     public int RequestChannelCapacity
     {
