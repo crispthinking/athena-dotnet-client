@@ -10,7 +10,7 @@ namespace Resolver.AthenaApiClient.Clients;
 /// <summary>
 /// Default implementation of <see cref="IAthenaApiClient"/>.
 /// </summary>
-public sealed class AthenaApiClient : IAthenaApiClient, IDisposable
+public sealed class AthenaApiClient : IAthenaApiClient
 {
     private readonly ClassifierService.ClassifierServiceClient _client;
 
@@ -123,11 +123,5 @@ public sealed class AthenaApiClient : IAthenaApiClient, IDisposable
             responseChannel.Writer.TryComplete(ex);
             throw;
         }
-    }
-
-    public void Dispose()
-    {
-        _senderTask?.Dispose();
-        _receiverTask?.Dispose();
     }
 }
