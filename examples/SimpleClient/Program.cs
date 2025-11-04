@@ -37,16 +37,4 @@ defaults:
         var parseResult = rootCommand.Parse(args);
         await parseResult.InvokeAsync();
     }
-
-    public static Command AddAthenaCommand(this Command parentCommand, string name, string description, Func<ParseResult, CancellationToken, Task<int>> commandHandler)
-    {
-        var command = new Command(name, description);
-        command.SetAction((parseResult, cancellationToken) =>
-        {
-            return commandHandler(parseResult, cancellationToken);
-        });
-        parentCommand.Subcommands.Add(command);
-        return command;
-    }
-
 }
