@@ -11,7 +11,7 @@ using Resolver.Athena.Client.HighLevelClient.Images;
 using Resolver.Athena.Client.HighLevelClient.Interfaces;
 using Resolver.Athena.Client.HighLevelClient.Models;
 using Resolver.Athena.Client.HighLevelClient.Options;
-using Resolver.Athena.Client.TPL.Clients;
+using Resolver.Athena.Client.TPL;
 using Resolver.Athena.Client.TPL.Options;
 using Resolver.Athena.Tests.TestSupport;
 using Xunit;

@@ -9,7 +9,7 @@ using Resolver.Athena.Client.HighLevelClient.Models;
 using Resolver.Athena.Client.HighLevelClient.Options;
 using Resolver.Athena.Grpc;
 
-namespace Resolver.Athena.Client.HighLevelClient.Clients;
+namespace Resolver.Athena.Client.HighLevelClient;
 
 /// <summary>
 /// High-level client for interacting with the Athena API.

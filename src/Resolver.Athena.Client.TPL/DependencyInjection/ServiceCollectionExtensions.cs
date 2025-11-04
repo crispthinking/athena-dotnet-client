@@ -5,7 +5,6 @@ using Resolver.Athena.Client.HighLevelClient.DependencyInjection;
 using Resolver.Athena.Client.HighLevelClient.Options;
 using Resolver.Athena.Client.TPL.Interfaces;
 using Resolver.Athena.Client.TPL.Options;
-using AthenaDataflowClientImplementation = Resolver.Athena.Client.TPL.Clients.AthenaDataflowClient;
 
 namespace Resolver.Athena.Client.TPL.DependencyInjection;
 
@@ -27,7 +26,7 @@ public static class ServiceCollectionExtensions
         services.AddAthenaClient(configureClient, configureTokenManager, configureStreaming);
 
         services.AddOptions<AthenaDataflowClientOptions>();
-        services.AddSingleton<IAthenaDataflowClient, AthenaDataflowClientImplementation>();
+        services.AddSingleton<IAthenaDataflowClient, AthenaDataflowClient>();
 
         if (configureDataflow is not null)
         {

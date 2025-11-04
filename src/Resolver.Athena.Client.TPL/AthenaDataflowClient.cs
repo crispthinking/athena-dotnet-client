@@ -10,7 +10,7 @@ using Resolver.Athena.Client.TPL.Models;
 using Resolver.Athena.Client.TPL.Options;
 using Resolver.Athena.Grpc;
 
-namespace Resolver.Athena.Client.TPL.Clients;
+namespace Resolver.Athena.Client.TPL;
 
 /// <summary>
 /// Athena TPL dataflow client.

@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Resolver.Athena.Client.ApiClient;
 using Resolver.Athena.Client.ApiClient.Auth;
 using Resolver.Athena.Client.ApiClient.DependencyInjection;
-using Resolver.Athena.Client.HighLevelClient.Clients;
 using Resolver.Athena.Client.HighLevelClient.Factories;
 using Resolver.Athena.Client.HighLevelClient.Interfaces;
 using Resolver.Athena.Client.HighLevelClient.Options;

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Resolver.Athena.Client.ApiClient;
 using Resolver.Athena.Client.ApiClient.Interfaces;
-using Resolver.Athena.Client.HighLevelClient.Clients;
+using Resolver.Athena.Client.HighLevelClient;
 using Resolver.Athena.Client.HighLevelClient.Factories;
 using Resolver.Athena.Client.HighLevelClient.Interfaces;
 using Resolver.Athena.Client.HighLevelClient.Options;

@@ -2,7 +2,7 @@ using Grpc.Net.Client;
 using Resolver.Athena.Client.ApiClient.Interfaces;
 using Resolver.Athena.Grpc;
 
-namespace Resolver.Athena.Client.ApiClient.Clients;
+namespace Resolver.Athena.Client.ApiClient.Factories;
 
 /// <summary>
 /// Factory for creating ClassifierServiceClient instances.

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Resolver.Athena.Client.ApiClient.Auth;
-using Resolver.Athena.Client.ApiClient.Clients;
+using Resolver.Athena.Client.ApiClient.Factories;
 using Resolver.Athena.Client.ApiClient.Interfaces;
 
 namespace Resolver.Athena.Client.ApiClient.DependencyInjection;
@@ -43,7 +43,7 @@ public static class ServiceCollectionExtensions
         services.AddOAuthTokenManager(configureTokenManager);
 
         services.AddSingleton<IAthenaClassifierServiceClientFactory, AthenaClassifierServiceClientFactory>();
-        services.AddSingleton<IAthenaApiClient, Clients.AthenaApiClient>();
+        services.AddSingleton<IAthenaApiClient, AthenaApiClient>();
         services.Configure(configureClient);
 
         return services;
