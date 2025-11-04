@@ -1,8 +1,8 @@
 using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
-using Resolver.AthenaClient.DependencyInjection;
-using Resolver.AthenaClient.Images;
-using Resolver.AthenaClient.Interfaces;
+using Resolver.Athena.Client.HighLevelClient.DependencyInjection;
+using Resolver.Athena.Client.HighLevelClient.Images;
+using Resolver.Athena.Client.HighLevelClient.Interfaces;
 
 namespace SimpleClient;
 

@@ -5,15 +5,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Options;
+using Resolver.Athena.Client.ApiClient;
+using Resolver.Athena.Client.HighLevelClient.Factories;
+using Resolver.Athena.Client.HighLevelClient.Images;
+using Resolver.Athena.Client.HighLevelClient.Interfaces;
+using Resolver.Athena.Client.HighLevelClient.Models;
+using Resolver.Athena.Client.HighLevelClient.Options;
+using Resolver.Athena.Client.TPL.Clients;
+using Resolver.Athena.Client.TPL.Options;
 using Resolver.Athena.Tests.TestSupport;
-using Resolver.AthenaApiClient;
-using Resolver.AthenaClient.Factories;
-using Resolver.AthenaClient.Images;
-using Resolver.AthenaClient.Interfaces;
-using Resolver.AthenaClient.Models;
-using Resolver.AthenaClient.Options;
-using Resolver.AthenaDataflowClient.Clients;
-using Resolver.AthenaDataflowClient.Options;
 using Xunit;
 
 /// <summary>

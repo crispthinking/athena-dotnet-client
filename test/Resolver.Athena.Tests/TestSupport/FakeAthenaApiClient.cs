@@ -1,6 +1,6 @@
 using System.Threading.Channels;
+using Resolver.Athena.Client.ApiClient.Interfaces;
 using Resolver.Athena.Grpc;
-using Resolver.AthenaApiClient.Interfaces;
 
 namespace Resolver.Athena.Tests.TestSupport;
 

@@ -1,4 +1,3 @@
-using Grpc.Core;
 using Moq;
 using Resolver.Athena.Grpc;
 

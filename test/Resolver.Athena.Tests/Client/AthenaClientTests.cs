@@ -1,11 +1,12 @@
 using Microsoft.Extensions.Options;
+using Resolver.Athena.Client.ApiClient;
+using Resolver.Athena.Client.HighLevelClient.Clients;
+using Resolver.Athena.Client.HighLevelClient.Factories;
+using Resolver.Athena.Client.HighLevelClient.Images;
+using Resolver.Athena.Client.HighLevelClient.Interfaces;
+using Resolver.Athena.Client.HighLevelClient.Models;
+using Resolver.Athena.Client.HighLevelClient.Options;
 using Resolver.Athena.Tests.TestSupport;
-using Resolver.AthenaApiClient;
-using Resolver.AthenaClient.Factories;
-using Resolver.AthenaClient.Images;
-using Resolver.AthenaClient.Interfaces;
-using Resolver.AthenaClient.Models;
-using Resolver.AthenaClient.Options;
 
 namespace Resolver.Athena.Tests.Client;
 
@@ -34,7 +35,7 @@ public class AthenaClientTests()
             .WithQueuedResponse([("ferret", 0.95f), ("ermine", 0.05f)])
             .Build();
 
-        var athenaClient = new AthenaClient.AthenaClient(apiClient, _inputFactory, _streamingOptions);
+        var athenaClient = new AthenaClient(apiClient, _inputFactory, _streamingOptions);
         List<ClassificationRequest> requests = [new ClassificationRequest("test-deployment-id", new AthenaImageRawUInt8(_dummyImageData), "my-correlation-id")];
 
         var results = athenaClient.ClassifyAsync(ToAsyncEnumerable(requests), TestContext.Current.CancellationToken);
@@ -68,7 +69,7 @@ public class AthenaClientTests()
 
         var apiClient = builder.Build();
 
-        var athenaClient = new AthenaClient.AthenaClient(apiClient, _inputFactory, _streamingOptions);
+        var athenaClient = new AthenaClient(apiClient, _inputFactory, _streamingOptions);
         List<ClassificationRequest> requests = [.. Enumerable.Range(0, requestsToSend).Select(i =>
             new ClassificationRequest("test-deployment-id", new AthenaImageRawUInt8(_dummyImageData), $"my-correlation-id-{i}")
         )];

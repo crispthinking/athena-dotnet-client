@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Resolver.AthenaApiClient.Auth;
+using Resolver.Athena.Client.ApiClient.Auth;
 
 namespace Resolver.Athena.Tests.TestSupport;
 

@@ -4,10 +4,11 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
 using Moq;
+using Resolver.Athena.Client.ApiClient;
+using Resolver.Athena.Client.ApiClient.Clients;
+using Resolver.Athena.Client.ApiClient.Interfaces;
 using Resolver.Athena.Grpc;
 using Resolver.Athena.Tests.TestSupport;
-using Resolver.AthenaApiClient;
-using Resolver.AthenaApiClient.Interfaces;
 
 namespace Resolver.Athena.Tests.Client;
 
@@ -178,7 +179,7 @@ public class AthenaApiClientTests()
         return channel;
     }
 
-    private AthenaApiClient.Clients.AthenaApiClient CreateTestApiClient(IEnumerable<ClassifyResponse> responses)
+    private AthenaApiClient CreateTestApiClient(IEnumerable<ClassifyResponse> responses)
     {
         var fakeRequestStream = new Mock<IClientStreamWriter<ClassifyRequest>>();
         fakeRequestStream.Setup(s => s.WriteAsync(It.IsAny<ClassifyRequest>(), It.IsAny<CancellationToken>()))
@@ -213,7 +214,7 @@ public class AthenaApiClientTests()
         factory.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<GrpcChannelOptions>()))
             .Returns(mockClient.Object);
 
-        return new AthenaApiClient.Clients.AthenaApiClient(tokenManagerMock.Object, opts, factory.Object);
+        return new AthenaApiClient(tokenManagerMock.Object, opts, factory.Object);
     }
 
     private static ClassifyResponse GenerateResponse(List<List<(string, float)>> classificationsPerOutput)

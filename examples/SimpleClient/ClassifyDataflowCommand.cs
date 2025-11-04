@@ -1,10 +1,10 @@
 using System.CommandLine;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.DependencyInjection;
-using Resolver.AthenaClient.Images;
-using Resolver.AthenaClient.Models;
-using Resolver.AthenaDataflowClient.DependencyInjection;
-using Resolver.AthenaDataflowClient.Interfaces;
+using Resolver.Athena.Client.HighLevelClient.Images;
+using Resolver.Athena.Client.HighLevelClient.Models;
+using Resolver.Athena.Client.TPL.DependencyInjection;
+using Resolver.Athena.Client.TPL.Interfaces;
 
 namespace SimpleClient;
 

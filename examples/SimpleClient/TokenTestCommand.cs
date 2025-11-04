@@ -1,7 +1,7 @@
 using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
-using Resolver.AthenaApiClient.DependencyInjection;
-using Resolver.AthenaApiClient.Interfaces;
+using Resolver.Athena.Client.ApiClient.DependencyInjection;
+using Resolver.Athena.Client.ApiClient.Interfaces;
 
 namespace SimpleClient;
 

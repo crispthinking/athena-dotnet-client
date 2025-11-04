@@ -2,8 +2,8 @@ using System.CommandLine;
 using System.Text;
 using System.Text.RegularExpressions;
 using dotenv.net;
-using Resolver.AthenaApiClient;
-using Resolver.AthenaApiClient.Auth;
+using Resolver.Athena.Client.ApiClient;
+using Resolver.Athena.Client.ApiClient.Auth;
 
 namespace SimpleClient;
 

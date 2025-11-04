@@ -1,18 +1,18 @@
 using Microsoft.Extensions.Options;
 using Moq;
+using Resolver.Athena.Client.ApiClient;
+using Resolver.Athena.Client.ApiClient.Interfaces;
+using Resolver.Athena.Client.HighLevelClient.Clients;
+using Resolver.Athena.Client.HighLevelClient.Factories;
+using Resolver.Athena.Client.HighLevelClient.Interfaces;
+using Resolver.Athena.Client.HighLevelClient.Options;
 using Resolver.Athena.Grpc;
-using Resolver.AthenaApiClient;
-using Resolver.AthenaApiClient.Interfaces;
-using Resolver.AthenaClient.Factories;
-using Resolver.AthenaClient.Interfaces;
-using Resolver.AthenaClient.Models;
-using Resolver.AthenaClient.Options;
 
 namespace Resolver.Athena.Tests.Client;
 
 public class AthenaClientTestsBase
 {
-    protected Resolver.AthenaClient.AthenaClient _athenaClient;
+    protected AthenaClient _athenaClient;
     protected Mock<IAthenaApiClient> _mockLowLevelClient;
     protected IOptions<AthenaApiClientConfiguration> _clientOptions;
     protected IAthenaClassificationInputFactory _inputFactory;
@@ -31,13 +31,13 @@ public class AthenaClientTestsBase
         });
         _inputFactory = new AthenaClassificationInputFactory(_clientOptions);
         _streamingOptions = new OptionsWrapper<AthenaClientOptions>(new AthenaClientOptions());
-        _athenaClient = new Resolver.AthenaClient.AthenaClient(_mockLowLevelClient.Object, _inputFactory, _streamingOptions);
+        _athenaClient = new AthenaClient(_mockLowLevelClient.Object, _inputFactory, _streamingOptions);
     }
 
-    public Resolver.AthenaClient.AthenaClient GetAthenaClient(AthenaApiClientConfiguration config)
+    public AthenaClient GetAthenaClient(AthenaApiClientConfiguration config)
     {
         var options = new OptionsWrapper<AthenaApiClientConfiguration>(config);
         var inputFactory = new AthenaClassificationInputFactory(options);
-        return new Resolver.AthenaClient.AthenaClient(_mockLowLevelClient.Object, inputFactory, _streamingOptions);
+        return new AthenaClient(_mockLowLevelClient.Object, inputFactory, _streamingOptions);
     }
 }

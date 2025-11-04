@@ -3,10 +3,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
+using Resolver.Athena.Client.ApiClient;
+using Resolver.Athena.Client.HighLevelClient.Images;
+using Resolver.Athena.Client.HighLevelClient.Models;
 using Resolver.Athena.Grpc;
-using Resolver.AthenaApiClient;
-using Resolver.AthenaClient.Images;
-using Resolver.AthenaClient.Models;
 
 namespace Resolver.Athena.Tests.Client;
 
