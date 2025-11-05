@@ -98,25 +98,13 @@ public static class ClassifyCommand
                 await foreach (var result in athenaClient.ClassifyAsync(GenerateRequests(cancellationToken), cancellationToken))
                 {
                     consumedResponses++;
+
+                    Console.WriteLine(result.ToPrettyString());
+
                     if (result.ErrorDetails != null)
                     {
                         errorResponses++;
-                        Console.WriteLine($"Error: {result.ErrorDetails.Code} - {result.ErrorDetails.Message}");
                         continue;
-                    }
-
-
-                    Console.WriteLine($"Classification Results for Correlation ID: {result.CorrelationId}");
-                    if (result.Classifications == null || result.Classifications.Count == 0)
-                    {
-                        Console.WriteLine("- <no classifications returned>");
-                    }
-                    else
-                    {
-                        foreach (var classification in result.Classifications)
-                        {
-                            Console.WriteLine($"- {classification.Label}: {classification.Confidence}");
-                        }
                     }
 
                     if (repeatSeconds == 0 && consumedResponses >= requestsToSend)

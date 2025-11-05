@@ -84,30 +84,11 @@ public static class ClassifyDataflowCommand
                 Console.WriteLine("[consumer] received classification result");
                 consumedResponses++;
 
+                Console.WriteLine(result.ToPrettyString());
 
                 if (result.ErrorDetails != null)
                 {
                     errorResponses++;
-                    Console.WriteLine($"Error: {result.ErrorDetails.Code} - {result.ErrorDetails.Message}");
-                    if (repeatSeconds == 0 && consumedResponses >= await requestsToSendCount.Task)
-                    {
-                        pipelineTCS.TrySetResult();
-                    }
-                    return;
-                }
-
-
-                Console.WriteLine($"Classification Results for Correlation ID: {result.CorrelationId}");
-                if (result.Classifications == null || result.Classifications.Count == 0)
-                {
-                    Console.WriteLine("- <no classifications returned>");
-                }
-                else
-                {
-                    foreach (var classification in result.Classifications)
-                    {
-                        Console.WriteLine($"- {classification.Label}: {classification.Confidence}");
-                    }
                 }
 
                 if (repeatSeconds == 0 && consumedResponses >= await requestsToSendCount.Task)
@@ -148,7 +129,6 @@ public static class ClassifyDataflowCommand
 
             await pipelineTCS.Task;
 
-            Console.WriteLine("Dataflow Summary:");
             Console.WriteLine(CliUtilities.GenerateStreamSummary(await requestsToSendCount.Task, consumedResponses, errorResponses));
 
             return 0;

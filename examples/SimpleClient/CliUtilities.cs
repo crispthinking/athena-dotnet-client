@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using dotenv.net;
 using Resolver.Athena.Client.ApiClient;
 using Resolver.Athena.Client.ApiClient.Auth;
+using Resolver.Athena.Client.HighLevelClient.Models;
 
 namespace SimpleClient;
 
@@ -153,5 +154,37 @@ public static partial class CliUtilities
         sb.AppendLine($"- Error Rate: {errorRate:F2}");
 
         return sb.ToString();
+    }
+
+    public static string ToPrettyString(this ClassificationResult result)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Classification Result (Correlation ID: {result.CorrelationId}):");
+
+        if (result.ErrorDetails != null)
+        {
+            sb.AppendLine($"Error: {result.ErrorDetails.Code} - {result.ErrorDetails.Message}");
+            return sb.ToString().TrimEnd();
+        }
+
+        if (result.Classifications == null || result.Classifications.Count == 0)
+        {
+            sb.AppendLine("<No classifications returned>");
+            return sb.ToString().TrimEnd();
+        }
+
+        var grouped = result.Classifications
+            .GroupBy(c => c.Label.Contains('-') ? c.Label.Split('-')[0] : "Uncategorized")
+            .ToList();
+        foreach (var group in grouped)
+        {
+            sb.AppendLine($"- {group.Key}:");
+            foreach (var classification in group)
+            {
+                var labelWithoutNamespace = classification.Label[(classification.Label.IndexOf('-') + 1)..];
+                sb.AppendLine($"    - {labelWithoutNamespace}: {classification.Confidence}");
+            }
+        }
+        return sb.ToString().TrimEnd();
     }
 }

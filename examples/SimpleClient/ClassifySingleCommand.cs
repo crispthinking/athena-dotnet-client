@@ -31,18 +31,9 @@ public static class ClassifySingleCommand
 
             var result = await athenaClient.ClassifySingleAsync(image, cancellationToken);
 
-            if (result.ErrorDetails != null)
-            {
-                Console.WriteLine($"Error: {result.ErrorDetails.Code} - {result.ErrorDetails.Message}");
-                return 1;
-            }
+            Console.WriteLine(result.ToPrettyString());
 
-            Console.WriteLine($"Classification Results for Correlation ID: {result.CorrelationId}");
-            foreach (var classification in result.Classifications)
-            {
-                Console.WriteLine($"- {classification.Label}: {classification.Confidence}");
-            }
-            return 0;
+            return result.ErrorDetails == null ? 0 : 1;
         }
         catch (Exception ex)
         {
