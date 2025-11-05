@@ -23,7 +23,7 @@ public static partial class CliUtilities
 
     public static readonly Argument<string> DeploymentIdArgument = new("deployment-id")
     {
-        Description = "Deployment ID to target for streaming classify",
+        Description = "Deployment ID to target for streaming classify. Use 'random' to generate a random ID.",
     };
 
     public static readonly Option<int> RepeatOption = new("--repeat", "-r")

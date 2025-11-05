@@ -14,8 +14,8 @@ public static class ClassifyDataflowCommand
     {
         var cmd = rootCommand.AddAthenaCommand("classify-dataflow", "Classify images using the TPL Dataflow Client", DoClassifyDataflowCommand);
         cmd.Options.Add(CliUtilities.RepeatOption);
-        cmd.Arguments.Add(CliUtilities.ImagePathArgument);
         cmd.Arguments.Add(CliUtilities.DeploymentIdArgument);
+        cmd.Arguments.Add(CliUtilities.ImagePathArgument);
     }
 
     public static async Task<int> DoClassifyDataflowCommand(ParseResult parseResult, CancellationToken cancellationToken)

@@ -14,8 +14,8 @@ public static class ClassifyCommand
     {
         var cmd = rootCommand.AddAthenaCommand("classify", "Classify images using the standard IAsyncEnumerable client", DoClassifyCommand);
         cmd.Options.Add(CliUtilities.RepeatOption);
-        cmd.Arguments.Add(CliUtilities.ImagePathArgument);
         cmd.Arguments.Add(CliUtilities.DeploymentIdArgument);
+        cmd.Arguments.Add(CliUtilities.ImagePathArgument);
     }
 
     public static async Task<int> DoClassifyCommand(ParseResult parseResult, CancellationToken cancellationToken)
