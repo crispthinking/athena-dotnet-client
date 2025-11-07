@@ -1,7 +1,7 @@
 using Resolver.Athena.Client.ApiClient;
-using Resolver.Athena.Client.HighLevelClient.Extensions;
 using Resolver.Athena.Grpc;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 namespace Resolver.Athena.Client.HighLevelClient.Images;
@@ -22,7 +22,6 @@ public class AthenaImageEncoded : AthenaImageBase
     public AthenaImageEncoded(byte[] data)
     {
         using var image = Image.Load(data);
-        var imageFormat = image?.Metadata?.DecodedImageFormat ?? throw new InvalidOperationException("Unable to determine image format.");
 
         if (image.Width != AthenaConstants.ExpectedImageWidth ||
             image.Height != AthenaConstants.ExpectedImageHeight)
@@ -30,10 +29,29 @@ public class AthenaImageEncoded : AthenaImageBase
             image.Mutate(x => x.Resize(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight));
         }
 
-        _format = image.ToAthenaImageFormat();
-        var memStream = new MemoryStream();
-        image.Save(memStream, imageFormat);
-        _bytes = memStream.ToArray();
+        _format = ImageFormat.RawUint8;
+
+        _bytes = new byte[AthenaConstants.ExpectedImageWidth *
+                          AthenaConstants.ExpectedImageHeight *
+                          AthenaConstants.ExpectedImageChannels];
+
+        using var rgbImage = image switch
+        {
+            Image<Rgb24> rgb => rgb,
+            _ => image.CloneAs<Rgb24>()
+        };
+
+        for (var y = 0; y < AthenaConstants.ExpectedImageHeight; y++)
+        {
+            for (var x = 0; x < AthenaConstants.ExpectedImageWidth; x++)
+            {
+                var pixel = rgbImage[x, y];
+                var idx = (y * AthenaConstants.ExpectedImageWidth + x) * AthenaConstants.ExpectedImageChannels;
+                _bytes[idx] = pixel.B;
+                _bytes[idx + 1] = pixel.G;
+                _bytes[idx + 2] = pixel.R;
+            }
+        }
     }
 
     /// <inheritdoc />
