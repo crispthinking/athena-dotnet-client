@@ -6,6 +6,9 @@
     <IncludeSymbols>true</IncludeSymbols>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
+    <!-- Automatically transform package IDs to avoid Resolver.* prefix conflict -->
+    <!-- Converts "Resolver.Athena.X" to "ResolverAthena.X" -->
+    <PackageId>$(MSBuildProjectName.Replace('Resolver.Athena', 'ResolverAthena'))</PackageId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GitVersion.MsBuild">
