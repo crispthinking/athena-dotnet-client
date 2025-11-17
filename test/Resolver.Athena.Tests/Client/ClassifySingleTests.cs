@@ -1,8 +1,12 @@
-using Grpc.Core;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Moq;
+using Resolver.Athena.Client.ApiClient;
+using Resolver.Athena.Client.HighLevelClient.Images;
+using Resolver.Athena.Client.HighLevelClient.Models;
 using Resolver.Athena.Grpc;
-using Resolver.Athena.Images;
-using Resolver.Athena.Models;
 
 namespace Resolver.Athena.Tests.Client;
 
@@ -30,16 +34,14 @@ public class ClassifySingleTests : AthenaClientTestsBase
             Classifications = { classification }
         };
 
-        _mockGrpcClient
+        _mockLowLevelClient
             .Setup(client => client.ClassifySingleAsync(
                 It.IsAny<ClassificationInput>(),
-                It.IsAny<Metadata>(),
-                It.IsAny<DateTime?>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(CreateAsyncUnaryCall(response));
+            .ReturnsAsync(response);
 
         // Act
-        var classifierOutput = await _athenaClient.ClassifySingleImageAsync(athenaImage, CancellationToken.None);
+        var classifierOutput = await _athenaClient.ClassifySingleAsync(athenaImage, CancellationToken.None);
 
         // Assert
         Assert.NotNull(classifierOutput);
@@ -53,7 +55,7 @@ public class ClassifySingleTests : AthenaClientTestsBase
     public async Task ClassifySingleAsync_WithHashOptions_ComputesHashesCorrectly(bool sendMd5, bool sendSha1)
     {
         // Arrange
-        var config = new AthenaClientConfiguration
+        var config = new AthenaApiClientConfiguration
         {
             Endpoint = "https://mock-endpoint",
             Affiliate = "test-affiliate",
@@ -73,25 +75,21 @@ public class ClassifySingleTests : AthenaClientTestsBase
             Classifications = { new Classification { Label = "dog", Weight = 0.85f } }
         };
 
-        _mockGrpcClient
+        _mockLowLevelClient
             .Setup(client => client.ClassifySingleAsync(
                 It.IsAny<ClassificationInput>(),
-                It.IsAny<Metadata>(),
-                It.IsAny<DateTime?>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(CreateAsyncUnaryCall(response));
+            .ReturnsAsync(response);
 
         // Act
-        await athenaClient.ClassifySingleImageAsync(athenaImage, CancellationToken.None);
+        await athenaClient.ClassifySingleAsync(athenaImage, CancellationToken.None);
 
         // Assert
-        _mockGrpcClient.Verify(client => client.ClassifySingleAsync(
+        _mockLowLevelClient.Verify(client => client.ClassifySingleAsync(
             It.Is<ClassificationInput>(input =>
                 ((sendMd5 ? 1 : 0) == input.Hashes.Count(h => h.Type == HashType.Md5)) &&
                 ((sendSha1 ? 1 : 0) == input.Hashes.Count(h => h.Type == HashType.Sha1))
             ),
-            It.IsAny<Metadata>(),
-            It.IsAny<DateTime?>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -116,16 +114,14 @@ public class ClassifySingleTests : AthenaClientTestsBase
             }
         };
 
-        _mockGrpcClient
+        _mockLowLevelClient
             .Setup(client => client.ClassifySingleAsync(
                 It.IsAny<ClassificationInput>(),
-                It.IsAny<Metadata>(),
-                It.IsAny<DateTime?>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(CreateAsyncUnaryCall(errorResponse));
+            .ReturnsAsync(errorResponse);
 
         // Act
-        var classifierOutput = await _athenaClient.ClassifySingleImageAsync(athenaImage, CancellationToken.None);
+        var classifierOutput = await _athenaClient.ClassifySingleAsync(athenaImage, CancellationToken.None);
 
         // Assert
         Assert.NotNull(classifierOutput);

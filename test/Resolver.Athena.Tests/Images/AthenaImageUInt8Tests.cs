@@ -1,5 +1,6 @@
+using Resolver.Athena.Client.ApiClient;
+using Resolver.Athena.Client.HighLevelClient.Images;
 using Resolver.Athena.Grpc;
-using Resolver.Athena.Images;
 
 namespace Resolver.Athena.Tests.Images;
 

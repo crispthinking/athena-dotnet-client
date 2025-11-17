@@ -9,8 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Resolver.Athena.Client\Resolver.Athena.Client.csproj" />
+    <ProjectReference Include="..\..\src\Resolver.Athena.Client.TPL\Resolver.Athena.Client.TPL.csproj" />
     <ProjectReference Include="..\..\src\Resolver.Athena.Grpc\Models\Resolver.Athena.Grpc.Models.csproj" />
-    <ProjectReference Include="..\..\src\Resolver.Athena\Resolver.Athena.csproj" />
+    <ProjectReference Include="..\..\src\Resolver.Athena.Grpc\Client\Resolver.Athena.Grpc.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>
