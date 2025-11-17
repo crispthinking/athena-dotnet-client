@@ -6,10 +6,27 @@
     <IncludeSymbols>true</IncludeSymbols>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
+
+    <!-- Package Metadata -->
     <!-- Automatically transform package IDs to avoid Resolver.* prefix conflict -->
     <!-- Converts "Resolver.Athena.X" to "ResolverAthena.X" -->
     <PackageId>$(MSBuildProjectName.Replace('Resolver.Athena', 'ResolverAthena'))</PackageId>
+    <Authors>Crisp Thinking Group Ltd</Authors>
+    <Company>Crisp Thinking Group Ltd</Company>
+    <Copyright>Copyright (c) 2025 Crisp Thinking Group Ltd</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/crispthinking/athena-dotnet-client</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/crispthinking/athena-dotnet-client</PackageProjectUrl>
+    <PackageTags>athena;csam;detection;resolver;image-classification</PackageTags>
+    <Description>Dotnet client library for interacting with the Athena API (Resolver Unknown CSAM Detection)</Description>
   </PropertyGroup>
+
+  <!-- Include README.md in all packages -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GitVersion.MsBuild">
       <PrivateAssets>all</PrivateAssets>
