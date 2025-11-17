@@ -14,14 +14,15 @@ the examples. Files beginning `.env` are configured to be ignored by git, to
 avoid accidentally committing sensitive information. Each example will describe
 any required configuration or command line arguments.
 
-### SimpleClient
+### Resolver.Athena.CliClient
+
 This example is a simple dotnet console application that can:
 - Test OAuth credentials to ensure token acquisition is working
 - Can perform a synchronous classification of a single image.
 
 To get started, run the following dotnet command:
 ```bash
-dotnet run --project examples/SimpleClient/SimpleClient.csproj -- --help
+dotnet run --project examples/Resolver.Athena.CliClient -- --help
 ```
 
 ## Development

@@ -6,7 +6,7 @@ using Resolver.Athena.Client.HighLevelClient.Images;
 using Resolver.Athena.Client.HighLevelClient.Interfaces;
 using Resolver.Athena.Client.HighLevelClient.Models;
 
-namespace SimpleClient;
+namespace Resolver.Athena.CliClient;
 
 public static class ClassifyCommand
 {

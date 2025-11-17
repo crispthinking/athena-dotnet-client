@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug SimpleClient CLI Command",
+            "name": "Debug Athena CLI Tool",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/examples/SimpleClient/bin/Debug/net9.0/SimpleClient.dll",
+            "program": "${workspaceFolder}/examples/Resolver.Athena.CliClient/bin/Debug/net9.0/Resolver.Athena.CliClient.dll",
             "args": ["${input:simple-client-commands}"],
             "justMyCode": false,
             "cwd": "${workspaceFolder}",
@@ -21,7 +21,7 @@
         {
             "type": "pickString",
             "id": "simple-client-commands",
-            "description": "which SimpleClient command do you wish to run?",
+            "description": "which Athena CLI command do you wish to run?",
             "options": [
                 "token-test",
                 "list-deployments"

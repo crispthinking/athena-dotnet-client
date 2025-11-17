@@ -4,7 +4,7 @@ using Resolver.Athena.Client.HighLevelClient.DependencyInjection;
 using Resolver.Athena.Client.HighLevelClient.Images;
 using Resolver.Athena.Client.HighLevelClient.Interfaces;
 
-namespace SimpleClient;
+namespace Resolver.Athena.CliClient;
 
 public static class ClassifySingleCommand
 {

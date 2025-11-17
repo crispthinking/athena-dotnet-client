@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Resolver.Athena.Client.ApiClient.DependencyInjection;
 using Resolver.Athena.Client.ApiClient.Interfaces;
 
-namespace SimpleClient;
+namespace Resolver.Athena.CliClient;
 
 public static class TokenTestCommand
 {

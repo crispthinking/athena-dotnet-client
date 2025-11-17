@@ -6,7 +6,7 @@ using Resolver.Athena.Client.ApiClient;
 using Resolver.Athena.Client.ApiClient.Auth;
 using Resolver.Athena.Client.HighLevelClient.Models;
 
-namespace SimpleClient;
+namespace Resolver.Athena.CliClient;
 
 public static partial class CliUtilities
 {

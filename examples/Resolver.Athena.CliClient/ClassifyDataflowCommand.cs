@@ -6,7 +6,7 @@ using Resolver.Athena.Client.HighLevelClient.Models;
 using Resolver.Athena.Client.TPL.DependencyInjection;
 using Resolver.Athena.Client.TPL.Interfaces;
 
-namespace SimpleClient;
+namespace Resolver.Athena.CliClient;
 
 public static class ClassifyDataflowCommand
 {
