@@ -5,7 +5,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>athena</ToolCommandName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resolver.Athena.Tests", "te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{B36A84DF-456D-A817-6EDD-3EC3E7F6E11F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleClient", "examples\SimpleClient\SimpleClient.csproj", "{B6E11FA2-F518-44EF-A999-4CE2625626E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resolver.Athena.CliClient", "examples\Resolver.Athena.CliClient\Resolver.Athena.CliClient.csproj", "{B6E11FA2-F518-44EF-A999-4CE2625626E5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resolver.Athena.Client", "src\Resolver.Athena.Client\Resolver.Athena.Client.csproj", "{22B5EE36-9902-4CE4-9AFD-B7D3D7C42F58}"
 EndProject

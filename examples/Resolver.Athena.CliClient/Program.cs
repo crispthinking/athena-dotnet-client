@@ -1,6 +1,6 @@
 using System.CommandLine;
 
-namespace SimpleClient;
+namespace Resolver.Athena.CliClient;
 
 static partial class Program
 {
