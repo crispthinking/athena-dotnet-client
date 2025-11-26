@@ -29,7 +29,7 @@ public class AthenaImageEncoded : AthenaImageBase
             image.Mutate(x => x.Resize(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight));
         }
 
-        _format = ImageFormat.RawUint8;
+        _format = ImageFormat.RawUint8Bgr;
 
         _bytes = new byte[AthenaConstants.ExpectedImageWidth *
                           AthenaConstants.ExpectedImageHeight *

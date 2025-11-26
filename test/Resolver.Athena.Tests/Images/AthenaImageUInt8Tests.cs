@@ -20,7 +20,7 @@ public class AthenaImageRawUInt8Tests
         var athenaImage = new AthenaImageRawUInt8(imageData);
 
         // Assert
-        Assert.Equal(ImageFormat.RawUint8, athenaImage.Format);
+        Assert.Equal(ImageFormat.RawUint8Bgr, athenaImage.Format);
         var bytes = athenaImage.GetBytes();
         Assert.Equal(expectedBytes, bytes.Length);
         Assert.True(imageData.SequenceEqual(bytes.ToArray()));

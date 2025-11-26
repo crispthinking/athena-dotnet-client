@@ -39,7 +39,7 @@ public class AthenaImageEncodedTests
         var athenaImage = new AthenaImageEncoded(imageData);
 
         // Assert
-        Assert.Equal(ImageFormat.RawUint8, athenaImage.Format);
+        Assert.Equal(ImageFormat.RawUint8Bgr, athenaImage.Format);
         var bytes = athenaImage.GetBytes();
         Assert.Equal(AthenaConstants.ExpectedImageWidth * AthenaConstants.ExpectedImageHeight * AthenaConstants.ExpectedImageChannels, bytes.Length);
     }
@@ -60,7 +60,7 @@ public class AthenaImageEncodedTests
         var athenaImage = new AthenaImageEncoded(imageData);
 
         // Assert
-        Assert.Equal(ImageFormat.RawUint8, athenaImage.Format);
+        Assert.Equal(ImageFormat.RawUint8Bgr, athenaImage.Format);
         var bytes = athenaImage.GetBytes();
         Assert.Equal(AthenaConstants.ExpectedImageWidth * AthenaConstants.ExpectedImageHeight * AthenaConstants.ExpectedImageChannels, bytes.Length);
     }
