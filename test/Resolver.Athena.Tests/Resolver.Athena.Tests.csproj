@@ -11,6 +11,7 @@
     <PackageReference Include="Grpc.Net.Client" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="ResolverAthena.Grpc.Models" />
     <PackageReference Include="RichardSzalay.MockHttp" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Xunit.Combinatorial" />
@@ -21,8 +22,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Resolver.Athena.Client\Resolver.Athena.Client.csproj" />
     <ProjectReference Include="..\..\src\Resolver.Athena.Client.TPL\Resolver.Athena.Client.TPL.csproj" />
-    <ProjectReference Include="..\..\src\Resolver.Athena.Grpc\Models\Resolver.Athena.Grpc.Models.csproj" />
-    <ProjectReference Include="..\..\src\Resolver.Athena.Grpc\Client\Resolver.Athena.Grpc.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

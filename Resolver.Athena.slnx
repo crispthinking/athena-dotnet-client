@@ -1,0 +1,18 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/examples/">
+    <Project Path="examples/Resolver.Athena.CliClient/Resolver.Athena.CliClient.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Resolver.Athena.Client.TPL/Resolver.Athena.Client.TPL.csproj" />
+    <Project Path="src/Resolver.Athena.Client/Resolver.Athena.Client.csproj" />
+  </Folder>
+  <Folder Name="/src/Resolver.Athena.Grpc/" />
+  <Folder Name="/test/">
+    <Project Path="test/Resolver.Athena.Tests/Resolver.Athena.Tests.csproj" />
+  </Folder>
+</Solution>
