@@ -46,16 +46,16 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore Resolver.Athena.sln
+        run: dotnet restore Resolver.Athena.slnx
 
       - name: Build
-        run: dotnet build Resolver.Athena.sln --configuration Release --no-restore
+        run: dotnet build Resolver.Athena.slnx --configuration Release --no-restore
 
       - name: Format Code
-        run: dotnet format Resolver.Athena.sln --verify-no-changes
+        run: dotnet format Resolver.Athena.slnx --verify-no-changes
 
       - name: Test
-        run: dotnet test Resolver.Athena.sln --configuration Release --no-build --logger "trx" --logger "console;verbosity=normal"
+        run: dotnet test Resolver.Athena.slnx --configuration Release --no-build --logger "trx" --logger "console;verbosity=normal"
 
       - name: Upload test results
         uses: actions/upload-artifact@v5
@@ -65,7 +65,7 @@ jobs:
 
       - name: Pack
         if: ${{ matrix.os == 'ubuntu-22.04' }}
-        run: dotnet pack Resolver.Athena.sln --configuration Release --no-build --output Artifacts
+        run: dotnet pack Resolver.Athena.slnx --configuration Release --no-build --output Artifacts
 
       - name: Upload NuGet packages
         if: ${{ matrix.os == 'ubuntu-22.04' }}
