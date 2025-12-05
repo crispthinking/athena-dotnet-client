@@ -104,7 +104,7 @@ public static partial class CliUtilities
         if (Directory.Exists(path))
         {
             var exts = new[] { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".webp" };
-            files.AddRange(Directory.EnumerateFiles(path, "*", SearchOption.TopDirectoryOnly)
+            files.AddRange(Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
                 .Where(f => exts.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase)));
         }
         else if (File.Exists(path))
