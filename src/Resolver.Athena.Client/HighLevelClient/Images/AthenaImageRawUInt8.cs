@@ -30,7 +30,7 @@ public class AthenaImageRawUInt8 : AthenaImageBase
     }
 
     /// <inheritdoc />
-    public override ImageFormat Format => ImageFormat.RawUint8;
+    public override ImageFormat Format => ImageFormat.RawUint8Bgr;
 
     /// <inheritdoc />
     public override Span<byte> GetBytes() => _data;
