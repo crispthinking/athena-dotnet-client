@@ -22,7 +22,7 @@
     <PackageVersion Include="xunit" Version="2.9.3" />
 
     <!-- Build -->
-    <PackageVersion Include="GitVersion.MsBuild" Version="6.4.0" />
+    <PackageVersion Include="GitVersion.MsBuild" Version="6.5.1" />
 
     <!-- Examples-Only Packages -->
     <PackageVersion Include="dotenv.net" Version="4.0.0" />
