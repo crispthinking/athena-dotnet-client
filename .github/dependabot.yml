@@ -20,13 +20,3 @@ updates:
       github-actions:
         patterns:
           - "*"
-  # Git submodules
-  - package-ecosystem: gitsubmodule
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    groups:
-      gitsubmodules:
-        patterns:
-          - "*"
