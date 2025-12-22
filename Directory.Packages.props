@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <ResolverAthenaGrpcVersion>0.7.0</ResolverAthenaGrpcVersion>
+    <ResolverAthenaGrpcVersion>1.0.0</ResolverAthenaGrpcVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Main application packages -->
