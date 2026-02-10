@@ -1,13 +1,13 @@
+using OpenCvSharp;
 using Resolver.Athena.Client.ApiClient;
 using Resolver.Athena.Grpc;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 
 namespace Resolver.Athena.Client.HighLevelClient.Images;
 
 /// <summary>
 /// Represents an image that is encoded in a specific format (e.g., JPEG, PNG).
+/// Uses OpenCvSharp with bilinear interpolation for resizing to match the
+/// reference OpenCV preprocessing pipeline.
 /// </summary>
 public class AthenaImageEncoded : AthenaImageBase
 {
@@ -16,40 +16,39 @@ public class AthenaImageEncoded : AthenaImageBase
 
     /// <summary>
     /// Creates a new instance of <see cref="AthenaImageEncoded"/> from the provided byte array.
+    /// Decodes the image and resizes to the expected dimensions using bilinear interpolation.
     /// </summary>
-    /// <param name="data">The byte array representing the image data.</param>
-    /// <exception cref="InvalidOperationException">Thrown when the image format cannot be determined.</exception>
+    /// <param name="data">The byte array representing the encoded image data.</param>
+    /// <exception cref="ArgumentException">Thrown when the image data cannot be decoded.</exception>
     public AthenaImageEncoded(byte[] data)
     {
-        using var image = Image.Load(data);
+        using var image = Cv2.ImDecode(data, ImreadModes.Color)
+            ?? throw new ArgumentException("Image data could not be decoded.");
 
-        if (image.Width != AthenaConstants.ExpectedImageWidth ||
-            image.Height != AthenaConstants.ExpectedImageHeight)
-        {
-            image.Mutate(x => x.Resize(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight));
-        }
+        if (image.Empty())
+            throw new ArgumentException("Image data could not be decoded.");
+
+        using var resized = image.Width == AthenaConstants.ExpectedImageWidth &&
+                            image.Height == AthenaConstants.ExpectedImageHeight
+            ? image.Clone()
+            : image.Resize(new Size(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight),
+                           interpolation: InterpolationFlags.Linear);
 
         _format = ImageFormat.RawUint8Bgr;
 
-        _bytes = new byte[AthenaConstants.ExpectedImageWidth *
+        var totalPixels = AthenaConstants.ExpectedImageWidth *
                           AthenaConstants.ExpectedImageHeight *
-                          AthenaConstants.ExpectedImageChannels];
+                          AthenaConstants.ExpectedImageChannels;
+        _bytes = new byte[totalPixels];
 
-        using var rgbImage = image switch
+        // OpenCV loads images in BGR order by default — copy directly.
+        // The Mat is contiguous HWC BGR uint8, which is exactly the format we need.
+        unsafe
         {
-            Image<Rgb24> rgb => rgb,
-            _ => image.CloneAs<Rgb24>()
-        };
-
-        for (var y = 0; y < AthenaConstants.ExpectedImageHeight; y++)
-        {
-            for (var x = 0; x < AthenaConstants.ExpectedImageWidth; x++)
+            var src = (byte*)resized.DataPointer;
+            for (var i = 0; i < totalPixels; i++)
             {
-                var pixel = rgbImage[x, y];
-                var idx = (y * AthenaConstants.ExpectedImageWidth + x) * AthenaConstants.ExpectedImageChannels;
-                _bytes[idx] = pixel.B;
-                _bytes[idx + 1] = pixel.G;
-                _bytes[idx + 2] = pixel.R;
+                _bytes[i] = src[i];
             }
         }
     }

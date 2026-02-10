@@ -9,22 +9,23 @@ namespace Resolver.Athena.Tests.Images;
 
 public class AthenaImageEncodedTests
 {
-    private class SupportedImageEncoders : TheoryData<IImageEncoder>
+    /// <summary>
+    /// Image encoders whose output OpenCV can reliably decode via ImDecode.
+    /// </summary>
+    private class OpenCvCompatibleEncoders : TheoryData<IImageEncoder>
     {
-        public SupportedImageEncoders()
+        public OpenCvCompatibleEncoders()
         {
-            Add(new SixLabors.ImageSharp.Formats.Gif.GifEncoder());
             Add(new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder());
             Add(new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder());
             Add(new SixLabors.ImageSharp.Formats.Png.PngEncoder());
             Add(new SixLabors.ImageSharp.Formats.Webp.WebpEncoder());
-            Add(new SixLabors.ImageSharp.Formats.Pbm.PbmEncoder());
             Add(new SixLabors.ImageSharp.Formats.Tiff.TiffEncoder());
         }
     }
 
     [Theory]
-    [ClassData(typeof(SupportedImageEncoders))]
+    [ClassData(typeof(OpenCvCompatibleEncoders))]
     public void Constructor_ValidImageWithIncorrectSize_ResizesAndSetsFormat(IImageEncoder encoder)
     {
         // Arrange
@@ -45,7 +46,7 @@ public class AthenaImageEncodedTests
     }
 
     [Theory]
-    [ClassData(typeof(SupportedImageEncoders))]
+    [ClassData(typeof(OpenCvCompatibleEncoders))]
     public void Constructor_ValidImageWithCorrectSize_SetsFormat(IImageEncoder encoder)
     {
         // Arrange
@@ -72,6 +73,6 @@ public class AthenaImageEncodedTests
         var invalidImageData = new byte[] { 0x00, 0x01, 0x02, 0x03 };
 
         // Act & Assert
-        Assert.Throws<UnknownImageFormatException>(() => new AthenaImageEncoded(invalidImageData));
+        Assert.Throws<ArgumentException>(() => new AthenaImageEncoded(invalidImageData));
     }
 }

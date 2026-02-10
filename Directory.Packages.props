@@ -10,6 +10,8 @@
     <PackageVersion Include="ResolverAthena.Grpc.Client" Version="$(ResolverAthenaGrpcVersion)" />
     <PackageVersion Include="ResolverAthena.Grpc.Models" Version="$(ResolverAthenaGrpcVersion)" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageVersion Include="OpenCvSharp4" Version="4.11.0.20250507" />
+    <PackageVersion Include="OpenCvSharp4.official.runtime.linux-x64" Version="4.11.0.20250507" />
     <!-- Test packages -->
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />

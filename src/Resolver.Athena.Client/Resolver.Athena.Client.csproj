@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,8 @@
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="ResolverAthena.Grpc.Client" />
     <PackageReference Include="SixLabors.ImageSharp" />
+    <PackageReference Include="OpenCvSharp4" />
+    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" />
     <PackageReference Include="Grpc.Net.Client" />
   </ItemGroup>
 </Project>
