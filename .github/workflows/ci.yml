@@ -28,6 +28,8 @@ jobs:
     strategy:
       fail-fast: false      # This allows the matrix jobs to run independently.
       matrix:
+        # Note: macOS runners are intentionally excluded because this project
+        # does not currently support macOS due to OpenCV native/runtime constraints.
         os: [ubuntu-22.04, windows-latest]
 
     steps:
