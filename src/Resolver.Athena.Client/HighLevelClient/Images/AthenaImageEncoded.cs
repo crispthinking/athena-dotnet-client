@@ -22,17 +22,18 @@ public class AthenaImageEncoded : AthenaImageBase
     /// <exception cref="ArgumentException">Thrown when the image data cannot be decoded.</exception>
     public AthenaImageEncoded(byte[] data)
     {
-        using var image = Cv2.ImDecode(data, ImreadModes.Color)
-            ?? throw new ArgumentException("Image data could not be decoded.");
+        using var image = Cv2.ImDecode(data, ImreadModes.Color);
+        if (image is null || image.Empty())
+            throw new ArgumentException("Image data could not be decoded.", nameof(data));
 
-        if (image.Empty())
-            throw new ArgumentException("Image data could not be decoded.");
+        var needsResize = image.Width != AthenaConstants.ExpectedImageWidth ||
+                          image.Height != AthenaConstants.ExpectedImageHeight;
 
-        using var resized = image.Width == AthenaConstants.ExpectedImageWidth &&
-                            image.Height == AthenaConstants.ExpectedImageHeight
-            ? image.Clone()
-            : image.Resize(new Size(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight),
-                           interpolation: InterpolationFlags.Linear);
+        using var resized = needsResize
+            ? image.Resize(new Size(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight),
+                           interpolation: InterpolationFlags.Linear)
+            : null;
+        var source = resized ?? image;
 
         _format = ImageFormat.RawUint8Bgr;
 
@@ -42,10 +43,11 @@ public class AthenaImageEncoded : AthenaImageBase
         _bytes = new byte[totalPixels];
 
         // OpenCV loads images in BGR order by default — copy directly.
-        // The Mat is contiguous HWC BGR uint8, which is exactly the format we need.
+        // Ensure the source is contiguous so the linear copy has no row padding.
+        using var contiguous = source.IsContinuous() ? null : source.Clone();
         unsafe
         {
-            var src = (byte*)resized.DataPointer;
+            var src = (byte*)(contiguous ?? source).DataPointer;
             for (var i = 0; i < totalPixels; i++)
             {
                 _bytes[i] = src[i];
