@@ -23,30 +23,53 @@ public class AthenaImageEncoded : AthenaImageBase
     /// <exception cref="ArgumentException">Thrown when the image data cannot be decoded.</exception>
     public AthenaImageEncoded(byte[] data)
     {
-        using var image = Cv2.ImDecode(data, ImreadModes.Color);
-        if (image is null || image.Empty())
-            throw new ArgumentException("Image data could not be decoded.", nameof(data));
+        Mat image;
+        try
+        {
+            image = Cv2.ImDecode(data, ImreadModes.Color);
+        }
+        catch (Exception ex)
+        {
+            throw new ArgumentException("Image data could not be decoded.", nameof(data), ex);
+        }
 
-        var needsResize = image.Width != AthenaConstants.ExpectedImageWidth ||
-                          image.Height != AthenaConstants.ExpectedImageHeight;
+        using (image)
+        {
+            if (image is null || image.Empty())
+                throw new ArgumentException("Image data could not be decoded.", nameof(data));
 
-        using var resized = needsResize
-            ? image.Resize(new Size(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight),
-                           interpolation: InterpolationFlags.Linear)
-            : null;
-        var source = resized ?? image;
+            var needsResize = image.Width != AthenaConstants.ExpectedImageWidth ||
+                              image.Height != AthenaConstants.ExpectedImageHeight;
 
-        _format = ImageFormat.RawUint8Bgr;
+            using var resized = needsResize
+                ? image.Resize(new Size(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight),
+                               interpolation: InterpolationFlags.Linear)
+                : null;
+            var source = resized ?? image;
 
-        var totalPixels = AthenaConstants.ExpectedImageWidth *
-                          AthenaConstants.ExpectedImageHeight *
-                          AthenaConstants.ExpectedImageChannels;
-        _bytes = new byte[totalPixels];
+            if (source.Type() != MatType.CV_8UC3)
+                throw new ArgumentException(
+                    $"Decoded image has unexpected type {source.Type()} (expected CV_8UC3).", nameof(data));
 
-        // OpenCV loads images in BGR order by default — copy directly.
-        // Ensure the source is contiguous so the linear copy has no row padding.
-        using var contiguous = source.IsContinuous() ? null : source.Clone();
-        Marshal.Copy((contiguous ?? source).Data, _bytes, 0, totalPixels);
+            _format = ImageFormat.RawUint8Bgr;
+
+            var expectedByteLength = AthenaConstants.ExpectedImageWidth *
+                                     AthenaConstants.ExpectedImageHeight *
+                                     AthenaConstants.ExpectedImageChannels;
+
+            var matByteLength = (int)(source.Total() * source.ElemSize());
+            if (matByteLength != expectedByteLength)
+                throw new ArgumentException(
+                    $"Mat buffer size ({matByteLength}) does not match expected byte length ({expectedByteLength}).",
+                    nameof(data));
+
+            _bytes = new byte[expectedByteLength];
+
+            // OpenCV loads images in BGR order by default — copy directly.
+            // Ensure the source is contiguous so the linear copy has no row padding.
+            using var contiguous = source.IsContinuous() ? null : source.Clone();
+            Marshal.Copy((contiguous ?? source).Data, _bytes, 0, expectedByteLength);
+        }
     }
 
     /// <inheritdoc />
