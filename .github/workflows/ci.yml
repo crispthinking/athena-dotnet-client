@@ -45,6 +45,12 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
+      - name: Install OpenCV native dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -yq libtesseract4 liblept5 libgtk2.0-0 libavcodec58 libavformat58 libavutil56 libswscale5
+
       - name: Restore dependencies
         run: dotnet restore Resolver.Athena.slnx
 
