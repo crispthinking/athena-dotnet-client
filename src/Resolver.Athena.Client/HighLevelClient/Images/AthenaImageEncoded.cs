@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using OpenCvSharp;
 using Resolver.Athena.Client.ApiClient;
 using Resolver.Athena.Grpc;
@@ -45,14 +46,7 @@ public class AthenaImageEncoded : AthenaImageBase
         // OpenCV loads images in BGR order by default — copy directly.
         // Ensure the source is contiguous so the linear copy has no row padding.
         using var contiguous = source.IsContinuous() ? null : source.Clone();
-        unsafe
-        {
-            var src = (byte*)(contiguous ?? source).DataPointer;
-            for (var i = 0; i < totalPixels; i++)
-            {
-                _bytes[i] = src[i];
-            }
-        }
+        Marshal.Copy((contiguous ?? source).Data, _bytes, 0, totalPixels);
     }
 
     /// <inheritdoc />
