@@ -13,11 +13,8 @@
     <PackageReference Include="ResolverAthena.Grpc.Client" />
     <PackageReference Include="SixLabors.ImageSharp" />
     <PackageReference Include="OpenCvSharp4" />
-    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'" />
-    <PackageReference Include="OpenCvSharp4.official.runtime.linux-arm64" Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'" />
-    <PackageReference Include="OpenCvSharp4.official.runtime.osx-x64" Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'" />
-    <PackageReference Include="OpenCvSharp4.official.runtime.osx-arm64" Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'" />
-    <PackageReference Include="OpenCvSharp4.official.runtime.win-x64" Condition="$([MSBuild]::IsOSPlatform('Windows')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'" />
+    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
     <PackageReference Include="Grpc.Net.Client" />
   </ItemGroup>
 </Project>

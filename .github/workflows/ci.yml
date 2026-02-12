@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false      # This allows the matrix jobs to run independently.
       matrix:
-        os: [ubuntu-22.04, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-latest]
 
     steps:
       - uses: actions/checkout@v6
