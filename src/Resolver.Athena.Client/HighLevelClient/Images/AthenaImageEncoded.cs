@@ -20,7 +20,7 @@ public class AthenaImageEncoded : AthenaImageBase
     /// Decodes the image and resizes to the expected dimensions using bilinear interpolation.
     /// </summary>
     /// <param name="data">The byte array representing the encoded image data.</param>
-    /// <exception cref="FormatException">Thrown when the image data cannot be decoded.</exception>
+    /// <exception cref="FormatException">Thrown when the image data cannot be decoded or has an unsupported pixel format.</exception>
     public AthenaImageEncoded(byte[] data)
     {
         Mat image;
@@ -48,8 +48,8 @@ public class AthenaImageEncoded : AthenaImageBase
             var source = resized ?? image;
 
             if (source.Type() != MatType.CV_8UC3)
-                throw new ArgumentException(
-                    $"Decoded image has unexpected type {source.Type()} (expected CV_8UC3).", nameof(data));
+                throw new FormatException(
+                    $"Decoded image has unexpected pixel type {source.Type()} (expected CV_8UC3).");
 
             _format = ImageFormat.RawUint8Bgr;
 
@@ -59,9 +59,8 @@ public class AthenaImageEncoded : AthenaImageBase
 
             var matByteLength = (int)(source.Total() * source.ElemSize());
             if (matByteLength != expectedByteLength)
-                throw new ArgumentException(
-                    $"Mat buffer size ({matByteLength}) does not match expected byte length ({expectedByteLength}).",
-                    nameof(data));
+                throw new FormatException(
+                    $"Mat buffer size ({matByteLength}) does not match expected byte length ({expectedByteLength}).");
 
             _bytes = new byte[expectedByteLength];
 
