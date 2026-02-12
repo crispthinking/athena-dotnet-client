@@ -73,6 +73,6 @@ public class AthenaImageEncodedTests
         var invalidImageData = new byte[] { 0x00, 0x01, 0x02, 0x03 };
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => new AthenaImageEncoded(invalidImageData));
+        Assert.Throws<FormatException>(() => new AthenaImageEncoded(invalidImageData));
     }
 }

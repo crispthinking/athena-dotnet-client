@@ -20,7 +20,7 @@ public class AthenaImageEncoded : AthenaImageBase
     /// Decodes the image and resizes to the expected dimensions using bilinear interpolation.
     /// </summary>
     /// <param name="data">The byte array representing the encoded image data.</param>
-    /// <exception cref="ArgumentException">Thrown when the image data cannot be decoded.</exception>
+    /// <exception cref="FormatException">Thrown when the image data cannot be decoded.</exception>
     public AthenaImageEncoded(byte[] data)
     {
         Mat image;
@@ -30,13 +30,13 @@ public class AthenaImageEncoded : AthenaImageBase
         }
         catch (Exception ex)
         {
-            throw new ArgumentException("Image data could not be decoded.", nameof(data), ex);
+            throw new FormatException("Image data could not be decoded.", ex);
         }
 
         using (image)
         {
             if (image is null || image.Empty())
-                throw new ArgumentException("Image data could not be decoded.", nameof(data));
+                throw new FormatException("Image data could not be decoded.");
 
             var needsResize = image.Width != AthenaConstants.ExpectedImageWidth ||
                               image.Height != AthenaConstants.ExpectedImageHeight;
@@ -67,8 +67,8 @@ public class AthenaImageEncoded : AthenaImageBase
 
             // OpenCV loads images in BGR order by default — copy directly.
             // Ensure the source is contiguous so the linear copy has no row padding.
-            using var contiguous = source.IsContinuous() ? null : source.Clone();
-            Marshal.Copy((contiguous ?? source).Data, _bytes, 0, expectedByteLength);
+            using var clonedForContiguity = source.IsContinuous() ? null : source.Clone();
+            Marshal.Copy((clonedForContiguity ?? source).Data, _bytes, 0, expectedByteLength);
         }
     }
 
