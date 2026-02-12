@@ -13,8 +13,8 @@
     <PackageReference Include="ResolverAthena.Grpc.Client" />
     <PackageReference Include="SixLabors.ImageSharp" />
     <PackageReference Include="OpenCvSharp4" />
-    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" />
     <PackageReference Include="Grpc.Net.Client" />
   </ItemGroup>
 </Project>
