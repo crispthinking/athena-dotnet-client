@@ -43,13 +43,23 @@ public class AthenaImageEncoded : AthenaImageBase
 
             using var resized = needsResize ? new Mat() : null;
             if (needsResize)
-                Cv2.Resize(image, resized!, new Size(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight),
-                           interpolation: InterpolationFlags.Linear);
+            {
+                Cv2.Resize(
+                    image,
+                    resized!,
+                    new Size(
+                        AthenaConstants.ExpectedImageWidth,
+                        AthenaConstants.ExpectedImageHeight),
+                    interpolation: InterpolationFlags.Linear);
+            }
+
             var source = resized ?? image;
 
             if (source.Type() != MatType.CV_8UC3)
+            {
                 throw new FormatException(
                     $"Decoded image has unexpected pixel type {source.Type()} (expected CV_8UC3).");
+            }
 
             _format = ImageFormat.RawUint8Bgr;
 
@@ -59,8 +69,10 @@ public class AthenaImageEncoded : AthenaImageBase
 
             var matByteLength = (int)(source.Total() * source.ElemSize());
             if (matByteLength != expectedByteLength)
+            {
                 throw new FormatException(
                     $"Mat buffer size ({matByteLength}) does not match expected byte length ({expectedByteLength}).");
+            }
 
             _bytes = new byte[expectedByteLength];
 
