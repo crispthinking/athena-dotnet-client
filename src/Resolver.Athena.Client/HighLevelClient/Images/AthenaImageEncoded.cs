@@ -41,10 +41,10 @@ public class AthenaImageEncoded : AthenaImageBase
             var needsResize = image.Width != AthenaConstants.ExpectedImageWidth ||
                               image.Height != AthenaConstants.ExpectedImageHeight;
 
-            using var resized = needsResize
-                ? image.Resize(new Size(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight),
-                               interpolation: InterpolationFlags.Linear)
-                : null;
+            using var resized = needsResize ? new Mat() : null;
+            if (needsResize)
+                Cv2.Resize(image, resized!, new Size(AthenaConstants.ExpectedImageWidth, AthenaConstants.ExpectedImageHeight),
+                           interpolation: InterpolationFlags.Linear);
             var source = resized ?? image;
 
             if (source.Type() != MatType.CV_8UC3)
