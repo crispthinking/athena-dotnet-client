@@ -36,7 +36,9 @@ public class AthenaImageEncoded : AthenaImageBase
         using (image)
         {
             if (image is null || image.Empty())
+            {
                 throw new FormatException("Image data could not be decoded.");
+            }
 
             var needsResize = image.Width != AthenaConstants.ExpectedImageWidth ||
                               image.Height != AthenaConstants.ExpectedImageHeight;
