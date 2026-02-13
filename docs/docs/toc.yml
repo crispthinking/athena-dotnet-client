@@ -1,4 +1,6 @@
 - name: Introduction
   href: introduction.md
+- name: Installation
+  href: installation.md
 - name: Core Concepts
   href: concepts.md
