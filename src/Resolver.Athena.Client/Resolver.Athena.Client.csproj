@@ -13,8 +13,14 @@
     <PackageReference Include="ResolverAthena.Grpc.Client" />
     <PackageReference Include="SixLabors.ImageSharp" />
     <PackageReference Include="OpenCvSharp4" />
-    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" />
     <PackageReference Include="Grpc.Net.Client" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win'">
+    <PackageReference Include="OpenCvSharp4.runtime.win" />
   </ItemGroup>
 </Project>
