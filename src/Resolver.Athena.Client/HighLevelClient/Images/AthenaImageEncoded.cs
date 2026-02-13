@@ -44,11 +44,11 @@ public class AthenaImageEncoded : AthenaImageBase
                               image.Height != AthenaConstants.ExpectedImageHeight;
 
             using var resized = needsResize ? new Mat() : null;
-            if (needsResize)
+            if (resized is not null)
             {
                 Cv2.Resize(
                     image,
-                    resized!,
+                    resized,
                     new Size(
                         AthenaConstants.ExpectedImageWidth,
                         AthenaConstants.ExpectedImageHeight),
@@ -81,7 +81,8 @@ public class AthenaImageEncoded : AthenaImageBase
             // OpenCV loads images in BGR order by default — copy directly.
             // Ensure the source is contiguous so the linear copy has no row padding.
             using var clonedForContiguity = source.IsContinuous() ? null : source.Clone();
-            Marshal.Copy((clonedForContiguity ?? source).Data, _bytes, 0, expectedByteLength);
+            var copySource = clonedForContiguity ?? source;
+            Marshal.Copy(copySource.Data, _bytes, 0, expectedByteLength);
         }
     }
 
