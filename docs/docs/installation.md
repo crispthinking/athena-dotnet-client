@@ -1,10 +1,10 @@
 # Debian-Specific Installation Instructions
 
 OpenCV is available as expected in the Debian repositories, but not all of its
-dependencies are available in modern debian in the versions expected by
+dependencies are available in modern Debian in the versions expected by
 opencvsharp.
 
-Fortunately, most of the dependencies are available in older version of the debian
+Fortunately, most of the dependencies are available in older versions of the Debian
 repositories, and we can configure apt to use those repositories as fallbacks.
 
 Add `bullseye` as a fallback repository in your apt configuration (usually
@@ -29,7 +29,7 @@ Then, you can install the required dependencies with:
 sudo apt install libtesseract4 liblept5 libgtk2.0-0 libavcodec58 libavformat58 libavutil56 libswscale5 libtiff5 libopenexr25
 ```
 
-Unfortunately, `libjpeg8` is not available in debian repositories since about
+Unfortunately, `libjpeg8` is not available in Debian repositories since about
 2017, and the replacement libjpeg62-turbo seems to not be compatible with
 opencvsharp. You can _however_ install `libjpeg8-turbo` from the Ubuntu Jammy
 repository, which is compatible. On bullseye, the dependencies are installed by
