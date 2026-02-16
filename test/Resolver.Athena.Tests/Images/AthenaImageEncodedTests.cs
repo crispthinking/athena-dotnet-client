@@ -1,40 +1,37 @@
 using Resolver.Athena.Client.ApiClient;
 using Resolver.Athena.Client.HighLevelClient.Images;
 using Resolver.Athena.Grpc;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.PixelFormats;
+using OpenCvSharp;
+
 
 namespace Resolver.Athena.Tests.Images;
 
 public class AthenaImageEncodedTests
 {
     /// <summary>
-    /// Image encoders whose output OpenCV can reliably decode via ImDecode.
+    /// Image encodings whose output OpenCV can reliably decode via ImDecode.
     /// </summary>
-    private class OpenCvCompatibleEncoders : TheoryData<IImageEncoder>
+    private class OpenCvCompatibleExtensions : TheoryData<string>
     {
-        public OpenCvCompatibleEncoders()
+        public OpenCvCompatibleExtensions()
         {
-            Add(new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder());
-            Add(new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder());
-            Add(new SixLabors.ImageSharp.Formats.Png.PngEncoder());
-            Add(new SixLabors.ImageSharp.Formats.Webp.WebpEncoder());
-            Add(new SixLabors.ImageSharp.Formats.Tiff.TiffEncoder());
+            Add(".jpg");
+            Add(".png");
+            Add(".webp");
+            Add(".tiff");
+            Add(".bmp");
         }
     }
 
     [Theory]
-    [ClassData(typeof(OpenCvCompatibleEncoders))]
-    public void Constructor_ValidImageWithIncorrectSize_ResizesAndSetsFormat(IImageEncoder encoder)
+    [ClassData(typeof(OpenCvCompatibleExtensions))]
+    public void Constructor_ValidImageWithIncorrectSize_ResizesAndSetsFormat(string extension)
     {
         // Arrange
         var originalWidth = 500;
         var originalHeight = 500;
-        using var image = new Image<Rgba32>(originalWidth, originalHeight);
-        using var memStream = new MemoryStream();
-        image.Save(memStream, encoder);
-        var imageData = memStream.ToArray();
+        using var image = new Mat(new Size(originalWidth, originalHeight), MatType.CV_8UC3, Scalar.All(128));
+        Cv2.ImEncode(extension, image, out var imageData);
 
         // Act
         var athenaImage = new AthenaImageEncoded(imageData);
@@ -46,16 +43,14 @@ public class AthenaImageEncodedTests
     }
 
     [Theory]
-    [ClassData(typeof(OpenCvCompatibleEncoders))]
-    public void Constructor_ValidImageWithCorrectSize_SetsFormat(IImageEncoder encoder)
+    [ClassData(typeof(OpenCvCompatibleExtensions))]
+    public void Constructor_ValidImageWithCorrectSize_SetsFormat(string extension)
     {
         // Arrange
         var originalWidth = AthenaConstants.ExpectedImageWidth;
         var originalHeight = AthenaConstants.ExpectedImageHeight;
-        using var image = new Image<Rgba32>(originalWidth, originalHeight);
-        using var memStream = new MemoryStream();
-        image.Save(memStream, encoder);
-        var imageData = memStream.ToArray();
+        using var image = new Mat(new Size(originalWidth, originalHeight), MatType.CV_8UC3, Scalar.All(128));
+        Cv2.ImEncode(extension, image, out var imageData);
 
         // Act
         var athenaImage = new AthenaImageEncoded(imageData);
