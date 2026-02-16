@@ -28,15 +28,15 @@ dotnet run --project examples/Resolver.Athena.CliClient -- --help
 ## Platform Support
 
 This library uses [OpenCvSharp](https://github.com/shimat/opencvsharp) for image
-preprocessing. The OpenCV native runtime packages currently support **Linux** and
-**Windows** only. **macOS is not supported** due to the lack of a compatible
+preprocessing. The OpenCV native runtime packages currently support **Linux (x64)**
+and **Windows (x64)** only. **macOS is not supported** due to the lack of a compatible
 OpenCV native runtime package.
 
-| Platform | Supported |
-|----------|:---------:|
-| Linux    | Yes       |
-| Windows  | Yes       |
-| macOS    | No        |
+| Platform | Architectures | Supported |
+|----------|---------------|:---------:|
+| Linux    | x64           | Yes       |
+| Windows  | x64           | Yes       |
+| macOS    | -             | No        |
 
 ## Development
 
