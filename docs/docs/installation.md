@@ -37,6 +37,9 @@ default, but you may have to install them manually on other versions.
 
 To install `libjpeg8-turbo` from the Ubuntu Jammy repository:
 ```bash
-wget http://launchpadlibrarian.net/587202140/libjpeg-turbo8_2.1.2-0ubuntu1_amd64.deb
+wget https://launchpadlibrarian.net/587202140/libjpeg-turbo8_2.1.2-0ubuntu1_amd64.deb
+sha256sum libjpeg-turbo8_2.1.2-0ubuntu1_amd64.deb
+# Verify that the checksum above matches the value published on the official Launchpad page
+# for this file before proceeding.
 sudo dpkg -i libjpeg-turbo8_2.1.2-0ubuntu1_amd64.deb
 ```
