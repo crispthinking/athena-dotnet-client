@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Resolver.Athena.Client.HighLevelClient.DependencyInjection;
 using Resolver.Athena.Client.HighLevelClient.Images;
@@ -29,9 +30,12 @@ public static class ClassifySingleCommand
             var imageData = await File.ReadAllBytesAsync(imagePath, cancellationToken);
             var image = new AthenaImageEncoded(imageData);
 
+            var stopwatch = Stopwatch.StartNew();
             var result = await athenaClient.ClassifySingleAsync(image, cancellationToken);
+            stopwatch.Stop();
 
             Console.WriteLine(result.ToPrettyString());
+            Console.WriteLine($"Took {stopwatch.ElapsedMilliseconds} ms.");
 
             return result.ErrorDetails == null ? 0 : 1;
         }
