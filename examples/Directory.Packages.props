@@ -19,10 +19,10 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
 
     <!-- Build -->
-    <PackageVersion Include="GitVersion.MsBuild" Version="6.5.1" />
+    <PackageVersion Include="GitVersion.MsBuild" Version="6.6.0" />
 
     <!-- Examples-Only Packages -->
-    <PackageVersion Include="dotenv.net" Version="4.0.0" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
+    <PackageVersion Include="dotenv.net" Version="4.0.1" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.3" />
   </ItemGroup>
 </Project>
