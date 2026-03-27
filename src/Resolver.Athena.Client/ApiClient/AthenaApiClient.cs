@@ -40,7 +40,6 @@ public sealed class AthenaApiClient : IAthenaApiClient
                 CallCredentials.FromInterceptor(async (context, metadata) =>
                 {
                     var token = await tokenManager.GetTokenAsync(context.CancellationToken).ConfigureAwait(false);
-                    Console.WriteLine("Using token: " + token);
                     metadata.Add("Authorization", $"Bearer {token}");
                 })),
             UnsafeUseInsecureChannelCallCredentials = options.Value.UnsafeAllowInsecure
