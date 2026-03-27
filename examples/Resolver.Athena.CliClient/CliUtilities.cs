@@ -37,6 +37,7 @@ public static partial class CliUtilities
     {
         Description = "If set, allows insecure connections to the Athena endpoint. For development use only.",
         DefaultValueFactory = _ => false,
+        Recursive = true,
     };
 
 
