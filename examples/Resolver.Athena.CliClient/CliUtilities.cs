@@ -33,7 +33,7 @@ public static partial class CliUtilities
         DefaultValueFactory = _ => 0,
     };
 
-    public static readonly Option<bool>  UnsafeAllowInsecure = new("--unsafe-insecure")
+    public static readonly Option<bool> UnsafeAllowInsecure = new("--unsafe-insecure")
     {
         Description = "If set, allows insecure connections to the Athena endpoint. For development use only.",
         DefaultValueFactory = _ => false,

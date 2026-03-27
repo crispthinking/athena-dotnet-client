@@ -23,10 +23,11 @@ public static class ClassifyCommand
         CliUtilities.LoadDotEnv(parseResult);
 
         var svcs = new ServiceCollection()
-            .AddAthenaClient(o => {
-                        CliUtilities.ConfigureAthenaClientFromEnv(o);
-                        o.UnsafeAllowInsecure = parseResult.GetValue(CliUtilities.UnsafeAllowInsecure);
-                    },
+            .AddAthenaClient(o =>
+            {
+                CliUtilities.ConfigureAthenaClientFromEnv(o);
+                o.UnsafeAllowInsecure = parseResult.GetValue(CliUtilities.UnsafeAllowInsecure);
+            },
                     CliUtilities.ConfigureOAuthTokenManagerFromEnv)
             .BuildServiceProvider();
 

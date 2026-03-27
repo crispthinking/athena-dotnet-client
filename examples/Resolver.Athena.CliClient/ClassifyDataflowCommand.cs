@@ -23,10 +23,11 @@ public static class ClassifyDataflowCommand
         CliUtilities.LoadDotEnv(parseResult);
 
         var svcs = new ServiceCollection()
-            .AddAthenaDataflowClient(o => {
-                    CliUtilities.ConfigureAthenaClientFromEnv(o);
-                    o.UnsafeAllowInsecure = parseResult.GetValue(CliUtilities.UnsafeAllowInsecure);
-                    },
+            .AddAthenaDataflowClient(o =>
+            {
+                CliUtilities.ConfigureAthenaClientFromEnv(o);
+                o.UnsafeAllowInsecure = parseResult.GetValue(CliUtilities.UnsafeAllowInsecure);
+            },
                 CliUtilities.ConfigureOAuthTokenManagerFromEnv)
             .BuildServiceProvider();
 
