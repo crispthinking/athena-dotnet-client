@@ -33,6 +33,13 @@ public static partial class CliUtilities
         DefaultValueFactory = _ => 0,
     };
 
+    public static readonly Option<bool> UnsafeAllowInsecure = new("--unsafe-insecure")
+    {
+        Description = "If set, allows insecure connections to the Athena endpoint. For development use only.",
+        DefaultValueFactory = _ => false,
+        Recursive = true,
+    };
+
 
     [GeneratedRegex("[^A-Za-z0-9_-]")]
     private static partial Regex CorrelationIdRegex();

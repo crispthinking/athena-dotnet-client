@@ -27,6 +27,7 @@ defaults:
 
         // reuse the pre-defined static option so LoadDotEnv can access the same option
         rootCommand.Options.Add(CliUtilities.DotenvPathOption);
+        rootCommand.Options.Add(CliUtilities.UnsafeAllowInsecure);
 
         TokenTestCommand.RegisterCommand(rootCommand);
         ListDeploymentsCommand.RegisterCommand(rootCommand);
