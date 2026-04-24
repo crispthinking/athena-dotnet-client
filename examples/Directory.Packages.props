@@ -23,6 +23,6 @@
 
     <!-- Examples-Only Packages -->
     <PackageVersion Include="dotenv.net" Version="4.0.1" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.5" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.7" />
   </ItemGroup>
 </Project>
