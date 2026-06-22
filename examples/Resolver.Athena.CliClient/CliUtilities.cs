@@ -63,8 +63,10 @@ public static partial class CliUtilities
 
     public static Action<AthenaApiClientConfiguration> ConfigureAthenaClientFromEnv => options =>
     {
-        var endpoint = Environment.GetEnvironmentVariable("ATHENA_ENDPOINT") ?? throw new InvalidOperationException("ATHENA_ENDPOINT not set in environment variables.");
-        options.Endpoint = endpoint;
+        if (Environment.GetEnvironmentVariable("ATHENA_ENDPOINT") is string endpoint)
+        {
+            options.Endpoint = endpoint;
+        }
         var affiliate = Environment.GetEnvironmentVariable("ATHENA_AFFILIATE") ?? throw new InvalidOperationException("ATHENA_AFFILIATE not set in environment variables.");
         options.Affiliate = affiliate;
         options.SendMd5Hash = true;

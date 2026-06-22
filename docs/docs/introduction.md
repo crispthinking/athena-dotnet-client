@@ -5,6 +5,10 @@ Unknown CSAM Detection Service. Documentation of the GRPC API itself along with
 the meaning of the underlying classification responses and API best practices
 can be found in the [Athena Protobufs Documentation](https://crispthinking.github.io/athena-protobufs/).
 
+The main API endpoint is `https://api.athena-risk-intelligence.com/`. This is the
+default endpoint used by the client library, so no additional endpoint configuration
+is required for standard usage.
+
 Classification can be performed in two ways:
 - **Synchronous**: A single image is sent to the API and a response is returned
   immediately. This is suitable for low volume use cases, cases where latency is
