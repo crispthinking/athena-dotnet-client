@@ -6,9 +6,14 @@ namespace Resolver.Athena.Client.ApiClient;
 public class AthenaApiClientConfiguration
 {
     /// <summary>
-    /// The Athena service endpoint.
+    /// The default Athena API endpoint.
     /// </summary>
-    public required string Endpoint { get; set; }
+    public const string DefaultEndpoint = "https://api.athena-risk-intelligence.com/";
+
+    /// <summary>
+    /// The Athena service endpoint. Defaults to <see cref="DefaultEndpoint"/>.
+    /// </summary>
+    public string Endpoint { get; set; } = DefaultEndpoint;
 
     /// <summary>
     /// The affiliate identifier.

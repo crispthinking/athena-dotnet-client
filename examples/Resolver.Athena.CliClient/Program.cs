@@ -13,10 +13,10 @@ Setup:
 Create a `.env` file in the project root with the following content:
    OAUTH_CLIENT_ID=your_client_id
    OAUTH_CLIENT_SECRET=your_client_secret
-   ATHENA_ENDPOINT=your-athena-endpoint.com
 
 You can optionally set these environment variables to override these provided
 defaults:
+   ATHENA_ENDPOINT=https://api.athena-risk-intelligence.com/
    OAUTH_AUDIENCE=crisp-athena-live
    OAUTH_AUTH_URL=https://crispthinking.auth0.com/oauth/token
 """;
