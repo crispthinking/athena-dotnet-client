@@ -24,4 +24,13 @@ public class AthenaApiClientConfiguration
     /// Indicates whether to send SHA1 hashes of images.
     /// </summary>
     public bool SendSha1Hash { get; set; }
+
+    /// <summary>
+    /// Indicates whether to allow insecure connections.
+    /// </summary>
+    /// <remarks>
+    /// This is obviously unsuitable for production use, and is intended for
+    /// local development and testing only.
+    /// </remarks>
+    public bool UnsafeAllowInsecure { get; set; }
 }
