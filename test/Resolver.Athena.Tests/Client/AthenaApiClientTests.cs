@@ -14,6 +14,7 @@ namespace Resolver.Athena.Tests.Client;
 public class AthenaApiClientTests()
 {
     private readonly List<ClassifyRequest> _sentRequests = [];
+    private GrpcChannelOptions? _capturedOptions = null;
 
     [Fact]
     public async Task SingleSendAndReceiveAsync()
@@ -161,6 +162,62 @@ public class AthenaApiClientTests()
         }
     }
 
+    [Fact]
+    public void ChannelIsSecure_ByDefault()
+    {
+        var opts = new AthenaApiClientConfiguration
+        {
+            Endpoint = "https://mock-endpoint",
+            Affiliate = "test-affiliate",
+            SendMd5Hash = true,
+            SendSha1Hash = true,
+        };
+
+        CreateTestApiClient([], opts);
+
+        Assert.NotNull(_capturedOptions);
+        Assert.NotNull(_capturedOptions.Credentials);
+        Assert.False(_capturedOptions.UnsafeUseInsecureChannelCallCredentials);
+    }
+
+    [Fact]
+    public void ChannelIsSecure_WhenExplicitlySet()
+    {
+        var opts = new AthenaApiClientConfiguration
+        {
+            Endpoint = "https://mock-endpoint",
+            Affiliate = "test-affiliate",
+            SendMd5Hash = true,
+            SendSha1Hash = true,
+            UnsafeAllowInsecure = false
+        };
+
+        CreateTestApiClient([], opts);
+
+        Assert.NotNull(_capturedOptions);
+        Assert.NotNull(_capturedOptions.Credentials);
+        Assert.False(_capturedOptions.UnsafeUseInsecureChannelCallCredentials);
+    }
+
+    [Fact]
+    public void ChannelIsInsecure_WhenExplicitlySet()
+    {
+        var opts = new AthenaApiClientConfiguration
+        {
+            Endpoint = "https://mock-endpoint",
+            Affiliate = "test-affiliate",
+            SendMd5Hash = true,
+            SendSha1Hash = true,
+            UnsafeAllowInsecure = true
+        };
+
+        CreateTestApiClient([], opts);
+
+        Assert.NotNull(_capturedOptions);
+        Assert.NotNull(_capturedOptions.Credentials);
+        Assert.True(_capturedOptions.UnsafeUseInsecureChannelCallCredentials);
+    }
+
     private static async Task<Channel<ClassifyRequest>> CreateChannelWithDataAsync(IEnumerable<ClassifyRequest> requests)
     {
         var channel = Channel.CreateBounded<ClassifyRequest>(new BoundedChannelOptions(1024)
@@ -180,6 +237,17 @@ public class AthenaApiClientTests()
 
     private AthenaApiClient CreateTestApiClient(IEnumerable<ClassifyResponse> responses)
     {
+        return CreateTestApiClient(responses, new AthenaApiClientConfiguration
+        {
+            Endpoint = "https://mock-endpoint",
+            Affiliate = "test-affiliate",
+            SendMd5Hash = true,
+            SendSha1Hash = true,
+        });
+    }
+
+    private AthenaApiClient CreateTestApiClient(IEnumerable<ClassifyResponse> responses, AthenaApiClientConfiguration config)
+    {
         var fakeRequestStream = new Mock<IClientStreamWriter<ClassifyRequest>>();
         fakeRequestStream.Setup(s => s.WriteAsync(It.IsAny<ClassifyRequest>(), It.IsAny<CancellationToken>()))
             .Callback<ClassifyRequest, CancellationToken>((r, ct) => _sentRequests.Add(r))
@@ -198,19 +266,14 @@ public class AthenaApiClientTests()
         mockClient.Setup(c => c.Classify(It.IsAny<Metadata>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
             .Returns(duplex);
 
-        var opts = new OptionsWrapper<AthenaApiClientConfiguration>(new AthenaApiClientConfiguration
-        {
-            Endpoint = "https://mock-endpoint",
-            Affiliate = "test-affiliate",
-            SendMd5Hash = true,
-            SendSha1Hash = true,
-        });
+        var opts = new OptionsWrapper<AthenaApiClientConfiguration>(config);
         var tokenManagerMock = new Mock<ITokenManager>();
         tokenManagerMock.Setup(tm => tm.GetTokenAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync("mock-token");
 
         var factory = new Mock<IAthenaClassifierServiceClientFactory>();
         factory.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<GrpcChannelOptions>()))
+            .Callback((string _, GrpcChannelOptions o) => _capturedOptions = o)
             .Returns(mockClient.Object);
 
         return new AthenaApiClient(tokenManagerMock.Object, opts, factory.Object);

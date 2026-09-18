@@ -29,15 +29,20 @@ public sealed class AthenaApiClient : IAthenaApiClient
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(clientFactory);
 
+        var credentialType = options.Value.UnsafeAllowInsecure
+            ? ChannelCredentials.Insecure
+            : new SslCredentials();
+
         var channelOptions = new GrpcChannelOptions
         {
             Credentials = ChannelCredentials.Create(
-                new SslCredentials(),
+                credentialType,
                 CallCredentials.FromInterceptor(async (context, metadata) =>
                 {
                     var token = await tokenManager.GetTokenAsync(context.CancellationToken).ConfigureAwait(false);
                     metadata.Add("Authorization", $"Bearer {token}");
-                }))
+                })),
+            UnsafeUseInsecureChannelCallCredentials = options.Value.UnsafeAllowInsecure
         };
 
         _client = clientFactory.Create(options.Value.Endpoint, channelOptions);
