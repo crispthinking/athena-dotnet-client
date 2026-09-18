@@ -29,24 +29,23 @@ public sealed class AthenaClassificationInputFactory(IOptions<AthenaApiClientCon
             Format = image.Format
         };
 
-        if (_configuration.SendMd5Hash)
+        foreach (var hash in image.Hashes)
         {
-            input.Hashes.Add(new ImageHash
+            if (image.HasDerivedHashes && !ShouldSend(hash.Type))
             {
-                Type = HashType.Md5,
-                Value = image.ComputeMd5Hash()
-            });
-        }
+                continue;
+            }
 
-        if (_configuration.SendSha1Hash)
-        {
-            input.Hashes.Add(new ImageHash
-            {
-                Type = HashType.Sha1,
-                Value = image.ComputeSha1Hash()
-            });
+            input.Hashes.Add(hash.Clone());
         }
 
         return input;
     }
+
+    private bool ShouldSend(HashType type) => type switch
+    {
+        HashType.Md5 => _configuration.SendMd5Hash,
+        HashType.Sha1 => _configuration.SendSha1Hash,
+        _ => false
+    };
 }
