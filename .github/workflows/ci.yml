@@ -55,7 +55,7 @@ jobs:
         run: dotnet format Resolver.Athena.slnx --verify-no-changes
 
       - name: Test
-        run: dotnet test Resolver.Athena.slnx --configuration Release --no-build --logger "trx" --logger "console;verbosity=normal"
+        run: dotnet test Resolver.Athena.slnx --configuration Release --no-build -- --report-xunit-trx --report-xunit-trx-filename test-results.trx
 
       - name: Upload test results
         uses: actions/upload-artifact@v7
