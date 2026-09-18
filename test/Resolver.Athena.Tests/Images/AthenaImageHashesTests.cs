@@ -38,4 +38,31 @@ public class AthenaImageHashesTests
         Assert.Throws<ArgumentException>(() => new AthenaImageHashes());
         Assert.Throws<ArgumentException>(() => new AthenaImageHashes([]));
     }
+
+    [Fact]
+    public void Constructor_WithImageHashes_ClonesSuppliedHashes()
+    {
+        // Arrange
+        var hash = new ImageHash { Type = HashType.Md5, Value = "abc" };
+
+        // Act
+        var athenaImage = new AthenaImageHashes([hash]);
+        hash.Value = "changed";
+
+        // Assert
+        Assert.Equal("abc", athenaImage.GetMd5Hash());
+    }
+
+    [Fact]
+    public void Hashes_ReturnsDefensiveCopies()
+    {
+        // Arrange
+        var athenaImage = new AthenaImageHashes(md5Hash: "abc");
+
+        // Act
+        athenaImage.Hashes.Single().Value = "changed";
+
+        // Assert
+        Assert.Equal("abc", athenaImage.GetMd5Hash());
+    }
 }

@@ -42,7 +42,7 @@ public abstract class AthenaImageBase
     protected AthenaImageBase(IEnumerable<ImageHash> hashes)
     {
         ArgumentNullException.ThrowIfNull(hashes);
-        _hashes = [.. hashes];
+        _hashes = [.. hashes.Select(CloneHash)];
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public abstract class AthenaImageBase
     /// Gets the hashes of the image. Hashes are computed from the original
     /// image data when the image is created.
     /// </summary>
-    public IReadOnlyList<ImageHash> Hashes => _hashes;
+    public IReadOnlyList<ImageHash> Hashes => [.. _hashes.Select(CloneHash)];
 
     /// <summary>
     /// Gets a value indicating whether the hashes were derived from the image
@@ -84,4 +84,10 @@ public abstract class AthenaImageBase
 
     private string? GetHash(HashType type) =>
         _hashes.FirstOrDefault(hash => hash.Type == type)?.Value;
+
+    private static ImageHash CloneHash(ImageHash hash) => new()
+    {
+        Type = hash.Type,
+        Value = hash.Value
+    };
 }
