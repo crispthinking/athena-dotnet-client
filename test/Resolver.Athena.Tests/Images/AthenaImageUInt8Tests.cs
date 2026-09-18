@@ -27,6 +27,28 @@ public class AthenaImageRawUInt8Tests
     }
 
     [Fact]
+    public void Constructor_ValidData_ComputesHashes()
+    {
+        // Arrange
+        var imageData = new byte[AthenaConstants.ExpectedImageWidth *
+                                 AthenaConstants.ExpectedImageHeight *
+                                 AthenaConstants.ExpectedImageChannels];
+        new Random().NextBytes(imageData);
+
+        // Act
+        var athenaImage = new AthenaImageRawUInt8(imageData);
+
+        // Assert
+        Assert.True(athenaImage.HasDerivedHashes);
+        Assert.Equal(
+            Convert.ToHexString(System.Security.Cryptography.MD5.HashData(imageData)).ToLowerInvariant(),
+            athenaImage.GetMd5Hash());
+        Assert.Equal(
+            Convert.ToHexString(System.Security.Cryptography.SHA1.HashData(imageData)).ToLowerInvariant(),
+            athenaImage.GetSha1Hash());
+    }
+
+    [Fact]
     public void Constructor_InvalidDataLength_ThrowsException()
     {
         // Arrange

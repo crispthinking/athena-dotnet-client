@@ -65,6 +65,27 @@ public class AthenaImageEncodedTests
         Assert.Equal(AthenaConstants.ExpectedImageWidth * AthenaConstants.ExpectedImageHeight * AthenaConstants.ExpectedImageChannels, bytes.Length);
     }
 
+    [Theory]
+    [ClassData(typeof(SupportedImageEncoders))]
+    public void Constructor_ValidImageWithIncorrectSize_HashesOriginalImage(IImageEncoder encoder)
+    {
+        // Arrange
+        using var image = new Image<Rgba32>(500, 500);
+        using var memStream = new MemoryStream();
+        image.Save(memStream, encoder);
+        var imageData = memStream.ToArray();
+        var expectedMd5 = Convert.ToHexString(System.Security.Cryptography.MD5.HashData(imageData)).ToLowerInvariant();
+        var expectedSha1 = Convert.ToHexString(System.Security.Cryptography.SHA1.HashData(imageData)).ToLowerInvariant();
+
+        // Act
+        var athenaImage = new AthenaImageEncoded(imageData);
+
+        // Assert
+        Assert.Equal(expectedMd5, athenaImage.GetMd5Hash());
+        Assert.Equal(expectedSha1, athenaImage.GetSha1Hash());
+        Assert.NotEqual(expectedMd5, Convert.ToHexString(System.Security.Cryptography.MD5.HashData(athenaImage.GetBytes())).ToLowerInvariant());
+    }
+
     [Fact]
     public void Constructor_InvalidImage_ThrowsException()
     {

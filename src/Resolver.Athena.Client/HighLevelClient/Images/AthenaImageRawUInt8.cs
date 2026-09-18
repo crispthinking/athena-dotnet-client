@@ -15,8 +15,15 @@ public class AthenaImageRawUInt8 : AthenaImageBase
     /// </summary>
     /// <param name="data">The byte array representing the image data.</param>
     /// <exception cref="ArgumentException">Thrown when the data length is invalid.</exception>
-    public AthenaImageRawUInt8(byte[] data)
+    public AthenaImageRawUInt8(byte[] data) : base(Validate(data))
     {
+        _data = data;
+    }
+
+    private static byte[] Validate(byte[] data)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+
         var expectedBytes = AthenaConstants.ExpectedImageWidth *
                             AthenaConstants.ExpectedImageHeight *
                             AthenaConstants.ExpectedImageChannels;
@@ -26,7 +33,7 @@ public class AthenaImageRawUInt8 : AthenaImageBase
             throw new ArgumentException($"Data length must be {expectedBytes} bytes for a {AthenaConstants.ExpectedImageWidth}x{AthenaConstants.ExpectedImageHeight} image with {AthenaConstants.ExpectedImageChannels} channels.");
         }
 
-        _data = data;
+        return data;
     }
 
     /// <inheritdoc />

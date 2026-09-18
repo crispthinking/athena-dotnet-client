@@ -19,7 +19,11 @@ public class AthenaImageEncoded : AthenaImageBase
     /// </summary>
     /// <param name="data">The byte array representing the image data.</param>
     /// <exception cref="InvalidOperationException">Thrown when the image format cannot be determined.</exception>
-    public AthenaImageEncoded(byte[] data)
+    /// <remarks>
+    /// The image hashes are computed from the original image data, before the
+    /// image is resized to the dimensions expected by the API.
+    /// </remarks>
+    public AthenaImageEncoded(byte[] data) : base(data)
     {
         using var image = Image.Load(data);
 
